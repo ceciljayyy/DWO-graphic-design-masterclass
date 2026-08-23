@@ -1,0 +1,8 @@
+export { AboutMasterclass } from "./AboutMasterclass";
+export { Audience } from "./Audience";
+export { FAQ } from "./FAQ";
+export { FinalCTA } from "./FinalCTA";
+export { Hero } from "./Hero";
+export { Instructor } from "./Instructor";
+export { LearningOutcomes } from "./LearningOutcomes";
+export { MasterclassDetails } from "./MasterclassDetails";
