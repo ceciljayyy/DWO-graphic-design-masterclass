@@ -1,26 +1,25 @@
 import type { Config } from "tailwindcss";
 
 const config = {
+  darkMode: ["selector", '[data-theme="dark"]'],
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       colors: {
-        background: "var(--color-near-black)",
-        foreground: "var(--color-off-white)",
-        surface: "var(--color-surface)",
-        muted: "var(--color-muted-gray)",
-        border: "var(--color-border)",
-        accent: "var(--color-gold)",
-        red: "var(--color-red)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        surface: "var(--surface)",
+        muted: "var(--muted)",
+        border: "var(--border)",
+        accent: "var(--accent)",
+        "accent-foreground": "var(--accent-foreground)",
+        red: "var(--red)",
         brand: {
-          black: "var(--color-deep-black)",
-          nearBlack: "var(--color-near-black)",
-          offWhite: "var(--color-off-white)",
-          surface: "var(--color-surface)",
-          mutedGray: "var(--color-muted-gray)",
-          border: "var(--color-border)",
-          red: "var(--color-red)",
-          gold: "var(--color-gold)",
+          black: "#080808",
+          nearBlack: "#0a0505",
+          offWhite: "#f5f0e6",
+          red: "#a10f16",
+          gold: "#f4b942",
         },
       },
       fontFamily: {
@@ -33,7 +32,7 @@ const config = {
         ],
       },
       boxShadow: {
-        subtle: "0 18px 60px rgba(0, 0, 0, 0.32)",
+        subtle: "var(--shadow-subtle)",
       },
       letterSpacing: {
         editorial: "0.02em",

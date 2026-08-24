@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { masterclass } from "@/lib/masterclass";
@@ -7,12 +9,14 @@ import { masterclass } from "@/lib/masterclass";
 export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-      <Container className="flex items-center justify-between gap-3 py-4 sm:py-5">
+      <Container className="flex items-center justify-between gap-3 py-3 sm:py-4">
         <div className="flex items-center gap-3">
-          <Link href="/" className="inline-flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center border border-border bg-surface font-display text-sm font-bold tracking-[0.24em] text-foreground">
-              DWO
-            </span>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3"
+            aria-label={`${masterclass.brand} home`}
+          >
+            <BrandLogo size="sm" priority />
             <span className="hidden font-display text-sm font-semibold uppercase tracking-[0.22em] text-foreground sm:inline-flex">
               {masterclass.shortName}
             </span>
@@ -35,10 +39,12 @@ export function Header() {
                 </a>
               ))}
             </nav>
+            <ThemeToggle />
             <ButtonLink href="/register">REGISTER NOW</ButtonLink>
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
+            <ThemeToggle />
             <ButtonLink
               href="/register"
               className="px-3 py-2 text-xs sm:px-4 sm:py-2.5"

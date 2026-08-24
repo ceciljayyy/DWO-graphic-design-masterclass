@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -104,15 +105,18 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
                 </p>
               </div>
             </div>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="px-3 py-2 text-xs"
-            >
-              {loggingOut ? "Signing out..." : "Logout"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="px-3 py-2 text-xs"
+              >
+                {loggingOut ? "Signing out..." : "Logout"}
+              </Button>
+            </div>
           </header>
 
           <div className="px-4 py-6 sm:px-6 lg:px-8">{children}</div>

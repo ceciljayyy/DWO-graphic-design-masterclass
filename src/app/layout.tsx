@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Barlow_Condensed, Outfit } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { masterclass } from "@/lib/masterclass";
 
 import "./globals.css";
+
+const themeInitScript = `(function(){try{var t=localStorage.getItem("dwo-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:"dark";}catch(e){document.documentElement.dataset.theme="dark";}})();`;
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -39,9 +42,17 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${barlowCondensed.variable}`}>
+    <html
+      lang="en"
+      className={`${outfit.variable} ${barlowCondensed.variable}`}
+      data-theme="dark"
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="bg-background font-sans text-foreground antialiased">
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

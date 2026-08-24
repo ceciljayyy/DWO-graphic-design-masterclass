@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Container } from "@/components/ui/container";
 import { masterclass } from "@/lib/masterclass";
 
@@ -8,11 +9,9 @@ export function Footer() {
     <footer className="border-t border-border bg-surface">
       <Container className="grid gap-10 py-12 sm:py-14 lg:grid-cols-[1.3fr_0.7fr_1fr] lg:gap-8">
         <div>
-          <div className="inline-flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center border border-border bg-background font-display text-sm font-bold tracking-[0.24em] text-foreground">
-              DWO
-            </span>
-            <span className="font-display text-sm font-semibold uppercase tracking-[0.22em] text-foreground">
+          <div className="inline-flex items-center gap-4">
+            <BrandLogo size="md" />
+            <span className="max-w-[12rem] font-display text-sm font-semibold uppercase tracking-[0.22em] text-foreground">
               {masterclass.name}
             </span>
           </div>
@@ -54,11 +53,16 @@ export function Footer() {
             ))}
             <a
               href={masterclass.contact.instagram.href}
-              className="transition-colors hover:text-accent"
+              className="group mt-1 inline-flex flex-col gap-1 transition-colors"
               target="_blank"
               rel="noreferrer"
             >
-              {masterclass.contact.instagram.handle}
+              <span className="font-display text-[11px] font-semibold uppercase tracking-[0.28em] text-muted">
+                Instagram
+              </span>
+              <span className="text-foreground transition-colors group-hover:text-accent">
+                {masterclass.contact.instagram.handle}
+              </span>
             </a>
           </div>
           <Link

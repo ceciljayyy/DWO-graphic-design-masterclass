@@ -21,7 +21,7 @@ export function ButtonLink({
 
   const variantStyles =
     variant === "primary"
-      ? "bg-accent text-background hover:bg-accent/90 focus:ring-accent"
+      ? "bg-accent text-accent-foreground hover:bg-accent/90 focus:ring-accent"
       : "border border-border bg-transparent text-foreground hover:border-accent hover:text-accent focus:ring-accent";
 
   return (
@@ -47,7 +47,7 @@ export function Button({
 
   const variantStyles =
     variant === "primary"
-      ? "bg-accent text-background hover:bg-accent/90 focus:ring-accent"
+      ? "bg-accent text-accent-foreground hover:bg-accent/90 focus:ring-accent"
       : "border border-border bg-transparent text-foreground hover:border-accent hover:text-accent focus:ring-accent";
 
   return (

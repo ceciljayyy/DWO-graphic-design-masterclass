@@ -23,6 +23,7 @@ export type MasterclassContact = {
   instagram: {
     handle: string;
     href: string;
+    label: string;
   };
 };
 
@@ -42,6 +43,9 @@ export function getRegistrationFeeInMinorUnits(
 export const masterclass = {
   brand: "DWO",
   brandFull: "Design With Otabil",
+  brandAssets: {
+    logo: "/brand/dwo-logo-white.png",
+  },
   name: "Graphic Design & Media Class",
   shortName: "Design & Media Class",
   description:
@@ -72,10 +76,10 @@ export const masterclass = {
     instagram: {
       handle: "@design_with_otabil",
       href: "https://www.instagram.com/design_with_otabil/",
+      label: "Follow the work",
     },
   } satisfies MasterclassContact,
   hero: {
-    eyebrow: "DWO · Design With Otabil",
     titleLines: ["GRAPHIC DESIGN", "& MEDIA"],
     titleAccent: "CLASS",
     description:
@@ -112,15 +116,11 @@ export const masterclass = {
   ] satisfies MasterclassListItem[],
   instructor: {
     sectionLabel: "Instructor",
-    name: "Instructor details to be announced",
-    role: "Official instructor biography pending",
-    bio: "The instructor section is prepared for the approved DWO profile. Verified biography, achievements, and photography have not been supplied yet.",
-    details: [
-      "Instructor bio: To be announced",
-      "Achievements: To be announced",
-      "Class format: To be announced",
-    ],
-    imageAlt: "Instructor placeholder for the Graphic Design and Media Class",
+    name: "James Baiden Otabil",
+    role: "Creative Director · Design With Otabil",
+    bio: "James Baiden Otabil isn’t just a graphic designer — he’s a visual storyteller. With over six years of hands-on experience, he transforms ideas into designs that speak, sell, and stick. His work includes collaborations with brands and personalities from Raphiya to theBandFRA! and Dave Da Musicbox.",
+    imageSrc: "/instructor/james-baiden-otabil.jpg",
+    imageAlt: "Portrait of James Baiden Otabil, Creative Director at Design With Otabil",
   },
   details: [
     {

@@ -1,3 +1,7 @@
+import Link from "next/link";
+
+import { BrandLogo } from "@/components/brand/BrandLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { RegistrationForm } from "@/components/register/RegistrationForm";
@@ -8,12 +12,22 @@ export default function RegisterPage() {
     <main className="bg-background">
       <Container className="py-8 sm:py-10">
         <div className="flex items-center justify-between gap-4 border-b border-border pb-6 text-sm text-muted">
-          <span className="font-display font-semibold uppercase tracking-[0.18em] text-foreground">
-            {masterclass.name}
-          </span>
-          <ButtonLink href="/" variant="secondary">
-            Back to home
-          </ButtonLink>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3"
+            aria-label={`${masterclass.brand} home`}
+          >
+            <BrandLogo size="sm" priority />
+            <span className="hidden font-display font-semibold uppercase tracking-[0.18em] text-foreground sm:inline">
+              {masterclass.name}
+            </span>
+          </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
+            <ButtonLink href="/" variant="secondary">
+              Back to home
+            </ButtonLink>
+          </div>
         </div>
       </Container>
 

@@ -9,7 +9,7 @@ export function FinalCTA() {
         <div className="relative overflow-hidden border border-border bg-surface px-6 py-10 sm:px-8 sm:py-12 lg:px-10">
           <div
             aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(135deg,rgba(161,15,22,0.55),transparent_58%)]"
+            className="absolute inset-0 bg-cta-glow"
           />
           <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>

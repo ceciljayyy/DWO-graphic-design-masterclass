@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { masterclass } from "@/lib/masterclass";
@@ -7,7 +8,7 @@ export function Hero() {
     <section className="relative overflow-hidden border-b border-border bg-background">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(161,15,22,0.42),transparent_36%),linear-gradient(180deg,rgba(8,8,8,0.15),rgba(8,8,8,0.92)_72%)]"
+        className="pointer-events-none absolute inset-0 bg-hero-overlay"
       />
       <div
         aria-hidden
@@ -17,11 +18,9 @@ export function Hero() {
       <Container className="relative py-12 sm:py-16 lg:py-20">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:gap-14">
           <div className="animate-fade-up max-w-3xl">
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.34em] text-accent sm:text-sm">
-              {masterclass.hero.eyebrow}
-            </p>
+            <BrandLogo size="lg" priority />
 
-            <h1 className="mt-5 font-display text-[clamp(2.75rem,12vw,6.5rem)] font-extrabold uppercase leading-[0.88] tracking-tightest text-foreground">
+            <h1 className="mt-6 font-display text-[clamp(2.75rem,12vw,6.5rem)] font-extrabold uppercase leading-[0.88] tracking-tightest text-foreground">
               {masterclass.hero.titleLines.map((line) => (
                 <span key={line} className="block">
                   {line}
@@ -77,7 +76,7 @@ export function Hero() {
           <aside className="animate-fade-up relative border border-border bg-surface/80 p-5 shadow-subtle [animation-delay:120ms] sm:p-6">
             <div
               aria-hidden
-              className="absolute inset-0 bg-[linear-gradient(155deg,rgba(161,15,22,0.38),transparent_55%)]"
+              className="absolute inset-0 bg-panel-glow"
             />
             <div className="relative">
               <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent">
