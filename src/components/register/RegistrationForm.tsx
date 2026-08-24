@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { Button, ButtonLink } from "@/components/ui/button";
 import { masterclass } from "@/lib/masterclass";
@@ -19,20 +19,24 @@ const initialFormValues: RegistrationFormValues = {
   phone: "",
   whatsapp: "",
   location: "",
-  experienceLevel: "BEGINNER",
+  experienceLevel: "",
 };
 
 type FieldName = keyof RegistrationFormValues;
 
 const fieldClassName =
-  "mt-2 w-full rounded-none border border-border bg-surface px-4 py-3 text-base text-foreground outline-none transition-colors placeholder:text-muted/70 focus:border-foreground focus:ring-1 focus:ring-foreground sm:text-sm";
+  "mt-2 w-full min-h-12 rounded-sm border border-border bg-background px-4 py-3 text-base text-foreground outline-none transition-colors placeholder:text-muted/70 focus:border-accent focus:ring-1 focus:ring-accent";
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) {
     return null;
   }
 
-  return <p className="mt-2 text-sm text-accent">{message}</p>;
+  return (
+    <p id={id} role="alert" className="mt-2 text-sm text-red">
+      {message}
+    </p>
+  );
 }
 
 function CopyButton({ value }: { value: string }) {
@@ -46,14 +50,169 @@ function CopyButton({ value }: { value: string }) {
         setCopied(true);
         window.setTimeout(() => setCopied(false), 1500);
       }}
-      className="inline-flex items-center justify-center rounded-sm border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
+      className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent"
     >
-      {copied ? "Copied" : "Copy reference"}
+      {copied ? "Copied" : "Copy"}
     </button>
   );
 }
 
+function formatPaymentStatus(status: string) {
+  if (status === "PENDING") {
+    return "Pending";
+  }
+
+  if (status === "PAID") {
+    return "Paid";
+  }
+
+  if (status === "FAILED") {
+    return "Failed";
+  }
+
+  return status;
+}
+
+function RegistrationSuccess({
+  successData,
+}: {
+  successData: RegistrationCreateResponseData;
+}) {
+  const [isPreparingPayment, setIsPreparingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  async function handleContinueToPayment() {
+    if (isPreparingPayment) {
+      return;
+    }
+
+    setIsPreparingPayment(true);
+    setPaymentError(null);
+
+    try {
+      const response = await fetch("/api/payments/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          registrationReference: successData.registrationReference,
+        }),
+      });
+
+      const payload = (await response.json()) as
+        | {
+            success: true;
+            data: { authorizationUrl: string };
+          }
+        | RegistrationApiError;
+
+      if (!response.ok || payload.success === false) {
+        setPaymentError(
+          payload.success === false
+            ? payload.error.message
+            : "We could not prepare payment right now.",
+        );
+        setIsPreparingPayment(false);
+        return;
+      }
+
+      window.location.assign(payload.data.authorizationUrl);
+    } catch {
+      setPaymentError(
+        "Something went wrong while preparing payment. Please try again.",
+      );
+      setIsPreparingPayment(false);
+    }
+  }
+
+  return (
+    <section
+      aria-live="polite"
+      className="border border-border bg-surface p-6 sm:p-8"
+    >
+      <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+        Registration created
+      </p>
+      <h2 className="mt-4 font-display text-2xl font-bold uppercase tracking-tightest text-foreground sm:text-3xl">
+        Your place is reserved pending payment
+      </h2>
+      <p className="mt-3 text-sm leading-7 text-muted sm:text-base">
+        Your details for the {masterclass.name} have been saved. Continue to
+        Paystack to complete your {registrationConfiguration.fee.display}{" "}
+        registration fee.
+      </p>
+
+      <div className="mt-6 grid gap-4 border-t border-border pt-6">
+        <div className="border border-border bg-background p-4">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+            Course
+          </p>
+          <p className="mt-2 font-display text-lg font-bold uppercase tracking-tightest text-foreground">
+            {masterclass.name}
+          </p>
+        </div>
+
+        <div className="border border-border bg-background p-4">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+            Registration Reference
+          </p>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="font-display text-xl font-extrabold tracking-editorial text-foreground">
+              {successData.registrationReference}
+            </p>
+            <CopyButton value={successData.registrationReference} />
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="border border-border bg-background p-4">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+              Amount
+            </p>
+            <p className="mt-2 font-display text-xl font-extrabold text-foreground">
+              {registrationConfiguration.fee.display}
+            </p>
+          </div>
+          <div className="border border-border bg-background p-4">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+              Payment Status
+            </p>
+            <p className="mt-2 text-base font-medium text-foreground">
+              {formatPaymentStatus(successData.paymentStatus)}
+            </p>
+          </div>
+        </div>
+
+        {paymentError ? (
+          <p role="alert" className="text-sm text-red">
+            {paymentError}
+          </p>
+        ) : null}
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            type="button"
+            onClick={handleContinueToPayment}
+            disabled={isPreparingPayment}
+            className="min-h-12 sm:w-auto"
+          >
+            {isPreparingPayment ? "PREPARING PAYMENT..." : "CONTINUE TO PAYMENT"}
+          </Button>
+          <ButtonLink href="/" variant="secondary" className="min-h-12">
+            Back to Home
+          </ButtonLink>
+        </div>
+
+        <p className="text-sm leading-7 text-muted">
+          You will be redirected to Paystack to complete payment securely. Your
+          registration stays pending until payment is verified.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export function RegistrationForm() {
+  const formId = useId();
   const [formValues, setFormValues] = useState<RegistrationFormValues>(initialFormValues);
   const [fieldErrors, setFieldErrors] = useState<RegistrationValidationErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -71,9 +230,7 @@ export function RegistrationForm() {
 
     const validation = validateRegistrationInput(formValues);
     if (validation.success === false) {
-      const { errors } = validation;
-
-      setFieldErrors(errors);
+      setFieldErrors(validation.errors);
       setFormError(null);
       return;
     }
@@ -116,176 +273,181 @@ export function RegistrationForm() {
 
   if (successData) {
     return (
-      <section className="border border-border bg-surface p-6 sm:p-8">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted">Registration created</p>
-        <h2 className="mt-4 text-2xl font-medium tracking-editorial text-foreground sm:text-3xl">
-          Your registration has been received.
-        </h2>
-        <p className="mt-3 text-sm leading-7 text-muted sm:text-base">
-          Your details have been saved with a pending payment status. The Paystack payment step will be connected in Phase 4.
-        </p>
-
-        <div className="mt-6 grid gap-4 border-t border-border pt-6">
-          <div className="border border-border bg-background p-4">
-            <p className="text-xs uppercase tracking-[0.26em] text-muted">Registration Reference</p>
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <p className="text-lg font-medium text-foreground">{successData.registrationReference}</p>
-              <CopyButton value={successData.registrationReference} />
-            </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="border border-border bg-background p-4">
-              <p className="text-xs uppercase tracking-[0.26em] text-muted">Payment Status</p>
-              <p className="mt-2 text-base font-medium text-foreground">{successData.paymentStatus}</p>
-            </div>
-            <div className="border border-border bg-background p-4">
-              <p className="text-xs uppercase tracking-[0.26em] text-muted">Amount</p>
-              <p className="mt-2 text-base font-medium text-foreground">{registrationConfiguration.fee.display}</p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="button" disabled className="sm:w-auto">
-              Continue to Payment
-            </Button>
-            <ButtonLink href="/" variant="secondary">
-              Back to Home
-            </ButtonLink>
-          </div>
-          <p className="text-sm leading-7 text-muted">
-            Payment integration will be enabled in the next phase. This screen only confirms that your registration record was created.
-          </p>
-        </div>
-      </section>
+      <RegistrationSuccess
+        successData={successData}
+      />
     );
   }
 
   return (
     <section className="border border-border bg-surface p-6 sm:p-8">
       <div className="mb-8 border-b border-border pb-5">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted">Registration</p>
-        <h1 className="mt-3 text-3xl font-medium tracking-editorial text-foreground sm:text-4xl">
-          Register for the {masterclass.name}
-        </h1>
+        <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+          Registration
+        </p>
+        <h2 className="mt-3 font-display text-3xl font-bold uppercase tracking-tightest text-foreground sm:text-4xl">
+          Complete your details
+        </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted sm:text-base">
-          Complete the form below to save your registration. Payment remains pending until Phase 4 connects Paystack.
+          Submit the form to create your pending registration. Payment is not
+          collected in this step.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="grid gap-5">
         <div>
-          <label htmlFor="fullName" className="text-sm font-medium text-foreground">
-            Full Name
+          <label htmlFor={`${formId}-fullName`} className="text-sm font-medium text-foreground">
+            Full Name <span className="text-accent">*</span>
           </label>
           <input
-            id="fullName"
+            id={`${formId}-fullName`}
             name="fullName"
             type="text"
             autoComplete="name"
+            required
+            aria-invalid={Boolean(fieldErrors.fullName)}
+            aria-describedby={fieldErrors.fullName ? `${formId}-fullName-error` : undefined}
             value={formValues.fullName}
             onChange={(event) => updateField("fullName", event.target.value)}
             className={fieldClassName}
             placeholder="Enter your full name"
           />
-          <FieldError message={fieldErrors.fullName} />
+          <FieldError id={`${formId}-fullName-error`} message={fieldErrors.fullName} />
         </div>
 
         <div>
-          <label htmlFor="email" className="text-sm font-medium text-foreground">
-            Email Address
+          <label htmlFor={`${formId}-email`} className="text-sm font-medium text-foreground">
+            Email Address <span className="text-accent">*</span>
           </label>
           <input
-            id="email"
+            id={`${formId}-email`}
             name="email"
             type="email"
             inputMode="email"
             autoComplete="email"
+            required
+            aria-invalid={Boolean(fieldErrors.email)}
+            aria-describedby={fieldErrors.email ? `${formId}-email-error` : undefined}
             value={formValues.email}
             onChange={(event) => updateField("email", event.target.value)}
             className={fieldClassName}
             placeholder="you@example.com"
           />
-          <FieldError message={fieldErrors.email} />
+          <FieldError id={`${formId}-email-error`} message={fieldErrors.email} />
         </div>
 
         <div>
-          <label htmlFor="phone" className="text-sm font-medium text-foreground">
-            Phone Number
+          <label htmlFor={`${formId}-phone`} className="text-sm font-medium text-foreground">
+            Phone Number <span className="text-accent">*</span>
           </label>
           <input
-            id="phone"
+            id={`${formId}-phone`}
             name="phone"
             type="tel"
             inputMode="tel"
             autoComplete="tel"
+            required
+            aria-invalid={Boolean(fieldErrors.phone)}
+            aria-describedby={fieldErrors.phone ? `${formId}-phone-error` : undefined}
             value={formValues.phone}
             onChange={(event) => updateField("phone", event.target.value)}
             className={fieldClassName}
-            placeholder="+233 000 000 000"
+            placeholder="+233 59 000 0000"
           />
-          <FieldError message={fieldErrors.phone} />
+          <FieldError id={`${formId}-phone-error`} message={fieldErrors.phone} />
         </div>
 
         <div>
-          <label htmlFor="whatsapp" className="text-sm font-medium text-foreground">
+          <label htmlFor={`${formId}-whatsapp`} className="text-sm font-medium text-foreground">
             WhatsApp Number <span className="text-muted">(optional)</span>
           </label>
           <input
-            id="whatsapp"
+            id={`${formId}-whatsapp`}
             name="whatsapp"
             type="tel"
             inputMode="tel"
             autoComplete="tel"
+            aria-invalid={Boolean(fieldErrors.whatsapp)}
+            aria-describedby={fieldErrors.whatsapp ? `${formId}-whatsapp-error` : undefined}
             value={formValues.whatsapp}
             onChange={(event) => updateField("whatsapp", event.target.value)}
             className={fieldClassName}
-            placeholder="WhatsApp number"
+            placeholder="+233 53 000 0000"
           />
-          <FieldError message={fieldErrors.whatsapp} />
+          <FieldError id={`${formId}-whatsapp-error`} message={fieldErrors.whatsapp} />
         </div>
 
         <div>
-          <label htmlFor="location" className="text-sm font-medium text-foreground">
-            Location <span className="text-muted">(optional)</span>
+          <label htmlFor={`${formId}-location`} className="text-sm font-medium text-foreground">
+            City / Town <span className="text-accent">*</span>
           </label>
           <input
-            id="location"
+            id={`${formId}-location`}
             name="location"
             type="text"
             autoComplete="address-level2"
+            required
+            aria-invalid={Boolean(fieldErrors.location)}
+            aria-describedby={fieldErrors.location ? `${formId}-location-error` : undefined}
             value={formValues.location}
             onChange={(event) => updateField("location", event.target.value)}
             className={fieldClassName}
-            placeholder="City or town"
+            placeholder="Accra"
           />
-          <FieldError message={fieldErrors.location} />
+          <FieldError id={`${formId}-location-error`} message={fieldErrors.location} />
         </div>
 
         <div>
-          <label htmlFor="experienceLevel" className="text-sm font-medium text-foreground">
-            Experience Level
+          <label
+            htmlFor={`${formId}-experienceLevel`}
+            className="text-sm font-medium text-foreground"
+          >
+            Experience Level <span className="text-accent">*</span>
           </label>
           <select
-            id="experienceLevel"
+            id={`${formId}-experienceLevel`}
             name="experienceLevel"
+            required
+            aria-invalid={Boolean(fieldErrors.experienceLevel)}
+            aria-describedby={
+              fieldErrors.experienceLevel ? `${formId}-experienceLevel-error` : undefined
+            }
             value={formValues.experienceLevel}
             onChange={(event) => updateField("experienceLevel", event.target.value)}
             className={fieldClassName}
           >
+            <option value="" disabled>
+              Select experience level
+            </option>
             <option value="BEGINNER">Beginner</option>
             <option value="INTERMEDIATE">Intermediate</option>
             <option value="ADVANCED">Advanced</option>
           </select>
-          <FieldError message={fieldErrors.experienceLevel} />
+          <FieldError
+            id={`${formId}-experienceLevel-error`}
+            message={fieldErrors.experienceLevel}
+          />
         </div>
 
-        <div className="rounded-none border border-border bg-background p-4 text-sm leading-7 text-muted">
-          Registration fee: <span className="font-medium text-foreground">{registrationConfiguration.fee.display}</span>
+        <div className="rounded-sm border border-border bg-background p-4 text-sm leading-7 text-muted">
+          Registration fee:{" "}
+          <span className="font-display text-base font-extrabold text-accent">
+            {registrationConfiguration.fee.display}
+          </span>
         </div>
 
-        {formError ? <p className="text-sm text-accent">{formError}</p> : null}
+        {formError ? (
+          <p role="alert" className="text-sm text-red">
+            {formError}
+          </p>
+        ) : null}
 
-        <Button type="submit" disabled={isSubmitting} className="w-full py-4 text-base">
-          {isSubmitting ? "Processing..." : "Register"}
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="min-h-12 w-full py-4 text-base"
+        >
+          {isSubmitting ? "CREATING REGISTRATION..." : "CONTINUE"}
         </Button>
       </form>
     </section>

@@ -32,6 +32,13 @@ export const registrationFee = {
   display: "GHS 700",
 } as const;
 
+/** Paystack expects the fee in the smallest currency unit (pesewas for GHS). */
+export function getRegistrationFeeInMinorUnits(
+  amountMajor: number = registrationFee.amount,
+) {
+  return Math.round(amountMajor * 100);
+}
+
 export const masterclass = {
   brand: "DWO",
   brandFull: "Design With Otabil",

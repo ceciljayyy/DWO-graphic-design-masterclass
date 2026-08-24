@@ -6,7 +6,7 @@ export type NormalizedRegistrationInput = {
   email: string;
   phone: string;
   whatsapp: string | null;
-  location: string | null;
+  location: string;
   experienceLevel: ExperienceLevel;
 };
 
@@ -66,12 +66,14 @@ export function validateRegistrationInput(input: unknown): RegistrationValidatio
     errors.phone = "Please enter a valid phone number.";
   }
 
-  if (whatsapp && whatsapp.length < 7) {
+  if (whatsapp && !/^[+]?([0-9][\s-]?){7,15}[0-9]$/.test(whatsapp.replace(/\s+/g, ""))) {
     errors.whatsapp = "Please enter a valid WhatsApp number or leave it blank.";
   }
 
-  if (location && location.length < 2) {
-    errors.location = "Please enter a valid location or leave it blank.";
+  if (!location) {
+    errors.location = "Please enter your city or town.";
+  } else if (location.length < 2) {
+    errors.location = "Please enter a valid city or town.";
   }
 
   if (!experienceLevel) {
@@ -91,7 +93,7 @@ export function validateRegistrationInput(input: unknown): RegistrationValidatio
       email,
       phone,
       whatsapp: whatsapp || null,
-      location: location || null,
+      location,
       experienceLevel: experienceLevel as ExperienceLevel,
     },
   };

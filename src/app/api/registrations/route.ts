@@ -4,6 +4,12 @@ import { createRegistrationRecord, isDuplicateEmailError } from "@/lib/registrat
 import { validateRegistrationInput } from "@/lib/registration";
 import type { RegistrationApiError, RegistrationApiSuccess } from "@/types/registration";
 
+/**
+ * Phase 3 note: lightweight in-memory rate limiting is intentionally not
+ * added here. Prefer edge/CDN or host-level throttling for Hostinger
+ * production hardening without introducing Redis for this phase.
+ */
+
 export function GET() {
   return NextResponse.json<RegistrationApiError>(
     {
@@ -30,7 +36,7 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: "VALIDATION_ERROR",
-            message: "Please check the highlighted fields and try again.",
+            message: "Please correct the highlighted fields.",
             fieldErrors: errors,
           },
         },
@@ -59,7 +65,7 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: "DUPLICATE_REGISTRATION",
-            message: "A registration already exists for this email address.",
+            message: "A registration already exists with this email address.",
           },
         },
         { status: 409 },

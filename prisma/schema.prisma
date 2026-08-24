@@ -25,11 +25,12 @@ model Registration {
   email                  String         @unique @db.VarChar(255)
   phone                  String         @db.VarChar(30)
   whatsapp               String?        @db.VarChar(30)
-  location               String?        @db.VarChar(191)
+  location               String         @db.VarChar(191)
   experienceLevel        ExperienceLevel
   paymentStatus          PaymentStatus  @default(PENDING)
   amount                 Decimal        @db.Decimal(10, 2)
   paystackReference      String?        @unique @db.VarChar(120)
+  paidAt                 DateTime?
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
 

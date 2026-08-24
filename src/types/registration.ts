@@ -11,8 +11,8 @@ export type RegistrationFormValues = {
   email: string;
   phone: string;
   whatsapp?: string;
-  location?: string;
-  experienceLevel: ExperienceLevel;
+  location: string;
+  experienceLevel: ExperienceLevel | "";
 };
 
 export type RegistrationValidationErrors = Partial<Record<keyof RegistrationFormValues | "form", string>>;

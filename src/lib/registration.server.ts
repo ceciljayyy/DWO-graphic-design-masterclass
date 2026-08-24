@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomInt } from "crypto";
 
 import { Prisma, type Registration } from "@prisma/client";
 
@@ -6,9 +6,31 @@ import { getPrismaClient } from "@/lib/prisma";
 import { registrationConfiguration } from "@/lib/registration";
 import type { NormalizedRegistrationInput } from "@/lib/registration";
 
+/** Readable public reference format: DWO-8K4P2M */
+const REFERENCE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
 function generateRegistrationReference() {
-  const token = randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
+  let token = "";
+
+  for (let index = 0; index < 6; index += 1) {
+    token += REFERENCE_ALPHABET[randomInt(REFERENCE_ALPHABET.length)];
+  }
+
   return `DWO-${token}`;
+}
+
+function getUniqueConstraintTargets(error: Prisma.PrismaClientKnownRequestError) {
+  const target = error.meta?.target;
+
+  if (Array.isArray(target)) {
+    return target.map(String);
+  }
+
+  if (typeof target === "string") {
+    return [target];
+  }
+
+  return [];
 }
 
 async function createWithUniqueReference(
@@ -35,8 +57,9 @@ async function createWithUniqueReference(
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        const target = error.meta?.target;
-        if (Array.isArray(target) && target.includes("registrationReference")) {
+        const targets = getUniqueConstraintTargets(error);
+
+        if (targets.some((value) => value.includes("registrationReference"))) {
           continue;
         }
       }
@@ -53,10 +76,9 @@ export async function createRegistrationRecord(data: NormalizedRegistrationInput
 }
 
 export function isDuplicateEmailError(error: unknown) {
-  return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2002" &&
-    Array.isArray(error.meta?.target) &&
-    error.meta?.target.includes("email")
-  );
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+
+  return getUniqueConstraintTargets(error).some((value) => value.includes("email"));
 }
