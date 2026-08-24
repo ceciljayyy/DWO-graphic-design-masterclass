@@ -9,6 +9,7 @@ export type PaymentSummaryData = {
   paymentStatus: PaymentStatus;
   paystackReference: string | null;
   paidAt: string | null;
+  confirmationEmailSent: boolean;
 };
 
 export type PaymentInitializeSuccess = {

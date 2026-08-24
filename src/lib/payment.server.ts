@@ -2,6 +2,7 @@ import { randomInt } from "crypto";
 
 import { Prisma, type PaymentStatus, type Registration } from "@prisma/client";
 
+import { maybeSendRegistrationConfirmation } from "@/lib/confirmation.server";
 import {
   getRegistrationFeeInMinorUnits,
   masterclass,
@@ -26,6 +27,7 @@ export type PaymentSummary = {
   paymentStatus: PaymentStatus;
   paystackReference: string | null;
   paidAt: string | null;
+  confirmationEmailSent: boolean;
 };
 
 export class PaymentFlowError extends Error {
@@ -50,7 +52,10 @@ function generatePaystackReference() {
   return `PSK-DWO-${token}`;
 }
 
-function toPaymentSummary(registration: Registration): PaymentSummary {
+function toPaymentSummary(
+  registration: Registration,
+  confirmationEmailSent?: boolean,
+): PaymentSummary {
   return {
     registrationReference: registration.registrationReference,
     fullName: registration.fullName,
@@ -60,6 +65,8 @@ function toPaymentSummary(registration: Registration): PaymentSummary {
     paymentStatus: registration.paymentStatus,
     paystackReference: registration.paystackReference,
     paidAt: registration.paidAt ? registration.paidAt.toISOString() : null,
+    confirmationEmailSent:
+      confirmationEmailSent ?? Boolean(registration.confirmationEmailSentAt),
   };
 }
 
@@ -233,9 +240,15 @@ export async function applyVerifiedPaystackTransaction(
   }
 
   if (registration.paymentStatus === "PAID") {
+    const confirmationEmailSent =
+      await maybeSendRegistrationConfirmation(registration);
+
     return {
       outcome: "already_paid" as const,
-      summary: toPaymentSummary(registration),
+      summary: toPaymentSummary(
+        registration,
+        confirmationEmailSent || Boolean(registration.confirmationEmailSentAt),
+      ),
     };
   }
 
@@ -255,9 +268,11 @@ export async function applyVerifiedPaystackTransaction(
       },
     });
 
+    const confirmationEmailSent = await maybeSendRegistrationConfirmation(updated);
+
     return {
       outcome: "paid" as const,
-      summary: toPaymentSummary(updated),
+      summary: toPaymentSummary(updated, confirmationEmailSent),
     };
   }
 
@@ -317,9 +332,15 @@ export async function verifyPaymentByPaystackReference(reference: string) {
   }
 
   if (registration.paymentStatus === "PAID") {
+    const confirmationEmailSent =
+      await maybeSendRegistrationConfirmation(registration);
+
     return {
       outcome: "already_paid" as const,
-      summary: toPaymentSummary(registration),
+      summary: toPaymentSummary(
+        registration,
+        confirmationEmailSent || Boolean(registration.confirmationEmailSentAt),
+      ),
     };
   }
 

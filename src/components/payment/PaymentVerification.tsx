@@ -180,10 +180,13 @@ export function PaymentVerification({ reference }: PaymentVerificationProps) {
                   Payment successful
                 </p>
                 <h1 className="mt-4 font-display text-3xl font-bold uppercase tracking-tightest text-foreground sm:text-4xl">
-                  Thank you for registering
+                  Registration confirmed
                 </h1>
                 <p className="mt-3 text-sm leading-7 text-muted sm:text-base">
                   Your payment for the {summary.courseName} has been confirmed.
+                  {summary.confirmationEmailSent
+                    ? " A confirmation email has been sent to you."
+                    : " Keep your registration reference below for your records."}
                 </p>
               </div>
 
@@ -235,6 +238,17 @@ export function PaymentVerification({ reference }: PaymentVerificationProps) {
                       {formatPaymentStatus(summary.paymentStatus)}
                     </p>
                   </div>
+                </div>
+
+                <div className="border border-border bg-background p-4">
+                  <p className="font-display text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+                    Confirmation Email
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-muted">
+                    {summary.confirmationEmailSent
+                      ? "Sent to the email address used during registration."
+                      : "Not sent yet. Your registration is still confirmed — check spam later or contact DWO if you need a copy."}
+                  </p>
                 </div>
               </div>
 

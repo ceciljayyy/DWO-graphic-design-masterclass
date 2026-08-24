@@ -19,21 +19,45 @@ enum PaymentStatus {
 }
 
 model Registration {
-  id                    String         @id @default(cuid()) @db.VarChar(191)
-  registrationReference  String         @unique @db.VarChar(32)
-  fullName               String         @db.VarChar(191)
-  email                  String         @unique @db.VarChar(255)
-  phone                  String         @db.VarChar(30)
-  whatsapp               String?        @db.VarChar(30)
-  location               String         @db.VarChar(191)
-  experienceLevel        ExperienceLevel
-  paymentStatus          PaymentStatus  @default(PENDING)
-  amount                 Decimal        @db.Decimal(10, 2)
-  paystackReference      String?        @unique @db.VarChar(120)
-  paidAt                 DateTime?
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
+  id                      String          @id @default(cuid()) @db.VarChar(191)
+  registrationReference   String          @unique @db.VarChar(32)
+  fullName                String          @db.VarChar(191)
+  email                   String          @unique @db.VarChar(255)
+  phone                   String          @db.VarChar(30)
+  whatsapp                String?         @db.VarChar(30)
+  location                String          @db.VarChar(191)
+  experienceLevel         ExperienceLevel
+  paymentStatus           PaymentStatus   @default(PENDING)
+  amount                  Decimal         @db.Decimal(10, 2)
+  paystackReference       String?         @unique @db.VarChar(120)
+  paidAt                  DateTime?
+  confirmationEmailSentAt DateTime?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
 
   @@index([paymentStatus])
   @@index([createdAt])
+  @@index([phone])
+  @@index([fullName])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid()) @db.VarChar(191)
+  name         String   @db.VarChar(191)
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AdminAuditLog {
+  id        String   @id @default(cuid()) @db.VarChar(191)
+  adminId   String?  @db.VarChar(191)
+  action    String   @db.VarChar(64)
+  metadata  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([createdAt])
+  @@index([action])
 }
