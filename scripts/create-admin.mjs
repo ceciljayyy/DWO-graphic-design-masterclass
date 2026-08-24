@@ -14,6 +14,21 @@ function readArg(name) {
   return match ? match.slice(prefix.length) : undefined;
 }
 
+function createAdapter(databaseUrl) {
+  const url = new URL(databaseUrl);
+
+  return new PrismaMariaDb({
+    host: url.hostname === "localhost" ? "127.0.0.1" : url.hostname,
+    port: Number(url.port || 3306),
+    user: decodeURIComponent(url.username),
+    password: decodeURIComponent(url.password),
+    database: url.pathname.replace(/^\//, ""),
+    connectionLimit: 5,
+    connectTimeout: 20000,
+    acquireTimeout: 20000,
+  });
+}
+
 async function main() {
   const email = readArg("email")?.trim().toLowerCase();
   const password = readArg("password");
@@ -33,14 +48,16 @@ async function main() {
 
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
-    console.error("DATABASE_URL is required.");
+    console.error("DATABASE_URL is required in .env.local or .env");
     process.exit(1);
   }
 
-  const adapter = new PrismaMariaDb(databaseUrl);
+  const adapter = createAdapter(databaseUrl);
   const prisma = new PrismaClient({ adapter });
 
   try {
+    await prisma.$queryRaw`SELECT 1`;
+
     const passwordHash = await bcrypt.hash(password, 12);
     const admin = await prisma.adminUser.upsert({
       where: { email },

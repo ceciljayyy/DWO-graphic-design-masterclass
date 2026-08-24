@@ -53,7 +53,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const admin = await authenticateAdmin(email, password);
+    let admin;
+
+    try {
+      admin = await authenticateAdmin(email, password);
+    } catch (error) {
+      console.error("[admin/login] authenticate failed", error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "DATABASE_UNAVAILABLE",
+            message:
+              "Unable to reach the database. Confirm MySQL is running and restart the dev server.",
+          },
+        },
+        { status: 503 },
+      );
+    }
 
     if (!admin) {
       await writeAdminAuditLog({
@@ -74,7 +91,24 @@ export async function POST(request: Request) {
     }
 
     clearLoginAttempts(rateKey);
-    await createAdminSession(admin);
+
+    try {
+      await createAdminSession(admin);
+    } catch (error) {
+      console.error("[admin/login] session failed", error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "SESSION_CONFIG_ERROR",
+            message:
+              "Admin session is not configured. Set ADMIN_SESSION_SECRET (32+ chars) in .env.local and restart the dev server.",
+          },
+        },
+        { status: 500 },
+      );
+    }
+
     await writeAdminAuditLog({
       adminId: admin.id,
       action: "LOGIN_SUCCESS",
@@ -87,7 +121,8 @@ export async function POST(request: Request) {
         email: admin.email,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("[admin/login] unexpected error", error);
     return NextResponse.json(
       {
         success: false,
