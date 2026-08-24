@@ -15,12 +15,10 @@ import { masterclass } from "@/lib/masterclass";
 
 export const metadata: Metadata = {
   title: masterclass.name,
-  description:
-    "Premium black-and-white landing page for the DWO Graphic Design Masterclass.",
+  description: masterclass.description,
   openGraph: {
     title: masterclass.name,
-    description:
-      "Premium black-and-white landing page for the DWO Graphic Design Masterclass.",
+    description: masterclass.description,
     type: "website",
   },
 };

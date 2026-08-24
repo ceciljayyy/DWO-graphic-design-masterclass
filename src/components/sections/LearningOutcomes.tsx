@@ -7,26 +7,23 @@ export function LearningOutcomes() {
     <section id="learn" className="border-t border-border bg-surface">
       <Container className="py-14 sm:py-16 lg:py-20">
         <SectionHeading
-          eyebrow="What you'll learn"
-          title="A clear outline of the creative areas the masterclass can cover"
-          description="These are editable placeholders. Keep the structure, then replace the content with the final approved DWO curriculum."
+          eyebrow="Skills to learn"
+          title="Four confirmed creative areas"
+          description="Official course skills from the Graphic Design & Media Class flyer."
         />
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {masterclass.learningOutcomes.map((item, index) => (
+        <div className="mt-10 divide-y divide-border border-y border-border">
+          {masterclass.skills.map((item, index) => (
             <article
               key={item.title}
-              className="group border-b border-border pb-5 pt-4 transition-transform duration-200 hover:-translate-y-0.5"
+              className="grid gap-2 py-5 transition-colors hover:text-accent sm:grid-cols-[7rem_1fr] sm:items-baseline sm:gap-6"
             >
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">
-                0{index + 1}
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+                0{index + 1} —
               </p>
-              <h3 className="mt-3 text-lg font-medium text-foreground">
+              <h3 className="font-display text-2xl font-extrabold uppercase leading-tight tracking-tightest text-foreground sm:text-3xl lg:text-4xl">
                 {item.title}
               </h3>
-              <p className="mt-3 text-sm leading-7 text-muted">
-                {item.description}
-              </p>
             </article>
           ))}
         </div>

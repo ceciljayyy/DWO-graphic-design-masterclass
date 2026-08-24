@@ -7,7 +7,7 @@ export type MasterclassFaq = {
 
 export type MasterclassListItem = {
   title: string;
-  description: string;
+  description?: string;
 };
 
 export type MasterclassStat = {
@@ -15,160 +15,155 @@ export type MasterclassStat = {
   value: string;
 };
 
+export type MasterclassContact = {
+  phoneNumbers: {
+    label: string;
+    href: string;
+  }[];
+  instagram: {
+    handle: string;
+    href: string;
+  };
+};
+
 export const registrationFee = {
   currency: "GHS",
-  display: "[GHS XXX]",
-  amount: "0.00",
+  amount: 700,
+  display: "GHS 700",
 } as const;
 
 export const masterclass = {
   brand: "DWO",
-  name: "DWO Graphic Design Masterclass",
-  tagline: "Premium creative education for aspiring graphic designers.",
+  brandFull: "Design With Otabil",
+  name: "Graphic Design & Media Class",
+  shortName: "Design & Media Class",
+  description:
+    "Join the Graphic Design & Media Class and learn Graphic Design, Content Creation, Social Media Management, and Reels Making.",
+  coursePeriod: {
+    start: "2026-09-21",
+    end: "2026-10-21",
+    display: "21 September – 21 October 2026",
+    shortDisplay: "21st Sept. – 21st Oct. 2026",
+  },
+  registrationStarts: {
+    date: "2026-09-04",
+    display: "4 September 2026",
+    shortDisplay: "4th September 2026",
+  },
+  price: registrationFee,
+  skills: [
+    { title: "Graphic Design" },
+    { title: "Content Creation" },
+    { title: "Social Media Management" },
+    { title: "Reels Making" },
+  ] satisfies MasterclassListItem[],
+  contact: {
+    phoneNumbers: [
+      { label: "+233 59 925 8957", href: "tel:+233599258957" },
+      { label: "+233 53 013 8872", href: "tel:+233530138872" },
+    ],
+    instagram: {
+      handle: "@design_with_otabil",
+      href: "https://www.instagram.com/design_with_otabil/",
+    },
+  } satisfies MasterclassContact,
   hero: {
-    eyebrow: "DWO Graphic Design Masterclass",
-    headline: "MASTER THE ART OF GRAPHIC DESIGN.",
+    eyebrow: "DWO · Design With Otabil",
+    titleLines: ["GRAPHIC DESIGN", "& MEDIA"],
+    titleAccent: "CLASS",
     description:
-      "A premium landing page foundation for the future DWO registration experience. Replace this placeholder copy with the final masterclass message when it is confirmed.",
-    date: "[Masterclass Date Placeholder]",
-    location: "[Masterclass Location Placeholder]",
-    price: registrationFee.display,
-    secondaryCta: "EXPLORE MASTERCLASS",
+      "A focused creative class covering Graphic Design, Content Creation, Social Media Management, and Reels Making.",
+    secondaryCta: "EXPLORE DETAILS",
   },
   intro: {
-    title: "A focused introduction to the masterclass",
-    body:
-      "Use this section to explain the purpose of the DWO Graphic Design Masterclass in the final content. This placeholder copy is intentionally neutral so it can be replaced without rewriting the page structure.",
-    bodySecondary:
-      "The layout is designed to communicate a premium creative education brand while keeping the copy clearly editable for future phases.",
+    title: "A practical creative media class",
+    body: "The Graphic Design & Media Class brings together the core creative skills from the official course flyer: design, content creation, social media management, and reels making.",
+    bodySecondary: `Registration opens on 4 September 2026. The course runs from 21 September to 21 October 2026 at a rate of ${registrationFee.display}.`,
   },
   navigation: [
     { label: "About", href: "#about" },
-    { label: "What You'll Learn", href: "#learn" },
+    { label: "Skills", href: "#learn" },
     { label: "Instructor", href: "#instructor" },
     { label: "FAQ", href: "#faq" },
   ] satisfies NavigationItem[],
-  learningOutcomes: [
-    {
-      title: "Design Fundamentals",
-      description: "Editable module placeholder for the core building blocks of visual design.",
-    },
-    {
-      title: "Typography",
-      description: "Editable module placeholder for type selection, hierarchy, and readability.",
-    },
-    {
-      title: "Colour Theory",
-      description: "Editable module placeholder for colour systems and visual mood.",
-    },
-    {
-      title: "Composition",
-      description: "Editable module placeholder for balance, spacing, and layout rhythm.",
-    },
-    {
-      title: "Branding",
-      description: "Editable module placeholder for identity thinking and visual consistency.",
-    },
-    {
-      title: "Social Media Design",
-      description: "Editable module placeholder for platform-ready creative assets.",
-    },
-    {
-      title: "Professional Workflow",
-      description: "Editable module placeholder for practical design process and delivery.",
-    },
-    {
-      title: "Creative Direction",
-      description: "Editable module placeholder for concept development and refinement.",
-    },
-  ] satisfies MasterclassListItem[],
   audience: [
     {
       title: "Beginners",
-      description: "Placeholder audience note for participants starting from the basics.",
-    },
-    {
-      title: "Aspiring Graphic Designers",
-      description: "Placeholder audience note for learners building a creative path.",
+      description:
+        "For learners who want to start building practical creative media skills.",
     },
     {
       title: "Content Creators",
-      description: "Placeholder audience note for creators improving visual output.",
+      description:
+        "For creators who want stronger visuals, planning, and short-form media output.",
     },
     {
-      title: "Entrepreneurs",
-      description: "Placeholder audience note for founders who need stronger branding.",
-    },
-    {
-      title: "Students",
-      description: "Placeholder audience note for students exploring design skills.",
-    },
-    {
-      title: "Existing Designers",
-      description: "Placeholder audience note for designers refining their approach.",
+      title: "Social Media Managers",
+      description:
+        "For people managing brand or personal pages and improving content consistency.",
     },
   ] satisfies MasterclassListItem[],
   instructor: {
-    sectionLabel: "About DWO",
-    name: "[DWO Name Placeholder]",
-    role: "[Instructor Role Placeholder]",
-    bio: "[Short bio placeholder. Replace with the approved DWO biography when available.]",
+    sectionLabel: "Instructor",
+    name: "Instructor details to be announced",
+    role: "Official instructor biography pending",
+    bio: "The instructor section is prepared for the approved DWO profile. Verified biography, achievements, and photography have not been supplied yet.",
     details: [
-      "[Experience placeholder]",
-      "[Credentials placeholder]",
-      "[Additional background placeholder]",
+      "Instructor bio: To be announced",
+      "Achievements: To be announced",
+      "Class format: To be announced",
     ],
-    imageAlt: "Placeholder portrait for DWO",
+    imageAlt: "Instructor placeholder for the Graphic Design and Media Class",
   },
   details: [
-    { label: "Date", value: "[Masterclass Date Placeholder]" },
-    { label: "Time", value: "[Masterclass Time Placeholder]" },
-    { label: "Location", value: "[Masterclass Location Placeholder]" },
-    { label: "Duration", value: "[Masterclass Duration Placeholder]" },
-    { label: "Registration Fee", value: registrationFee.display },
-    { label: "Deadline", value: "[Registration Deadline Placeholder]" },
+    {
+      label: "Course Period",
+      value: "21 September – 21 October 2026",
+    },
+    {
+      label: "Registration Starts",
+      value: "4 September 2026",
+    },
+    {
+      label: "Rate",
+      value: registrationFee.display,
+    },
   ] satisfies MasterclassStat[],
   faqs: [
     {
-      question: "Who can attend?",
+      question: "Who can register for the class?",
       answer:
-        "[Placeholder answer. Replace with the final attendance policy when it is confirmed.]",
+        "The class is suited to people who want to learn practical creative media skills. Contact the provided numbers for any specific eligibility questions.",
     },
     {
-      question: "Is this suitable for beginners?",
+      question: "What skills will be taught?",
       answer:
-        "[Placeholder answer. Replace with the final suitability guidance when it is confirmed.]",
-    },
-    {
-      question: "What will I need for the masterclass?",
-      answer:
-        "[Placeholder answer. Replace with the final equipment or materials list when it is confirmed.]",
-    },
-    {
-      question: "Where will the masterclass take place?",
-      answer:
-        "[Placeholder answer. Replace with the final venue details when it is confirmed.]",
+        "The confirmed skills are Graphic Design, Content Creation, Social Media Management, and Reels Making.",
     },
     {
       question: "How much is registration?",
-      answer:
-        "[Placeholder answer. Replace with the final pricing and payment details when it is confirmed.]",
+      answer: `The confirmed rate is ${registrationFee.display}.`,
+    },
+    {
+      question: "When does the course begin?",
+      answer: "The course begins on 21 September 2026.",
+    },
+    {
+      question: "How long does the course run?",
+      answer: "The course runs from 21 September 2026 to 21 October 2026.",
+    },
+    {
+      question: "When does registration start?",
+      answer: "Registration starts on 4 September 2026.",
     },
     {
       question: "How do I register?",
       answer:
-        "[Placeholder answer. The registration workflow will be added in a later phase.]",
-    },
-    {
-      question: "What happens after payment?",
-      answer:
-        "[Placeholder answer. Confirmation and payment processing will be introduced later.]",
+        "Use the Register Now button to open the registration page. For extra guidance, contact +233 59 925 8957 or +233 53 013 8872.",
     },
   ] satisfies MasterclassFaq[],
   footer: {
     description:
-      "Premium creative education landing page foundation for the DWO Graphic Design Masterclass.",
-    contact: "[Contact details placeholder]",
-    social: "[Social media placeholder]",
+      "Official digital landing page for the Graphic Design & Media Class by DWO.",
   },
 } as const;

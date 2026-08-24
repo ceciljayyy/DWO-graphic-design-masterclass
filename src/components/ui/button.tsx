@@ -17,18 +17,15 @@ export function ButtonLink({
   variant = "primary",
 }: ButtonLinkProps) {
   const baseStyles =
-    "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background";
+    "inline-flex items-center justify-center rounded-sm px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.18em] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background";
 
   const variantStyles =
     variant === "primary"
-      ? "bg-accent text-white hover:bg-accent/90 focus:ring-accent"
-      : "border border-border bg-surface text-foreground hover:border-foreground focus:ring-foreground";
+      ? "bg-accent text-background hover:bg-accent/90 focus:ring-accent"
+      : "border border-border bg-transparent text-foreground hover:border-accent hover:text-accent focus:ring-accent";
 
   return (
-    <Link
-      href={href}
-      className={cn(baseStyles, variantStyles, className)}
-    >
+    <Link href={href} className={cn(baseStyles, variantStyles, className)}>
       {children}
     </Link>
   );
@@ -46,15 +43,19 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex items-center justify-center rounded-sm px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.18em] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60";
 
   const variantStyles =
     variant === "primary"
-      ? "bg-accent text-white hover:bg-accent/90 focus:ring-accent"
-      : "border border-border bg-surface text-foreground hover:border-foreground focus:ring-foreground";
+      ? "bg-accent text-background hover:bg-accent/90 focus:ring-accent"
+      : "border border-border bg-transparent text-foreground hover:border-accent hover:text-accent focus:ring-accent";
 
   return (
-    <button type={type} className={cn(baseStyles, variantStyles, className)} {...props}>
+    <button
+      type={type}
+      className={cn(baseStyles, variantStyles, className)}
+      {...props}
+    >
       {children}
     </button>
   );

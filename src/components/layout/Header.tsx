@@ -10,18 +10,21 @@ export function Header() {
       <Container className="flex items-center justify-between gap-3 py-4 sm:py-5">
         <div className="flex items-center gap-3">
           <Link href="/" className="inline-flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center border border-foreground/10 bg-surface text-sm font-semibold tracking-[0.24em] text-foreground">
+            <span className="inline-flex h-10 w-10 items-center justify-center border border-border bg-surface font-display text-sm font-bold tracking-[0.24em] text-foreground">
               DWO
             </span>
-            <span className="hidden text-sm font-medium uppercase tracking-[0.26em] text-foreground sm:inline-flex">
-              {masterclass.name}
+            <span className="hidden font-display text-sm font-semibold uppercase tracking-[0.22em] text-foreground sm:inline-flex">
+              {masterclass.shortName}
             </span>
           </Link>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden items-center gap-6 lg:flex">
-            <nav aria-label="Primary" className="flex items-center gap-6 text-sm text-muted">
+            <nav
+              aria-label="Primary"
+              className="flex items-center gap-6 text-sm text-muted"
+            >
               {masterclass.navigation.map((item) => (
                 <a
                   key={item.label}
@@ -36,16 +39,22 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
-            <ButtonLink href="/register" className="px-3 py-2 text-xs sm:px-4 sm:py-2.5">
+            <ButtonLink
+              href="/register"
+              className="px-3 py-2 text-xs sm:px-4 sm:py-2.5"
+            >
               REGISTER
             </ButtonLink>
 
             <details className="group relative">
-              <summary className="list-none cursor-pointer rounded-full border border-border bg-surface px-3 py-2 text-xs font-medium uppercase tracking-[0.24em] text-foreground transition-colors hover:border-foreground sm:px-4 sm:py-2.5">
+              <summary className="list-none cursor-pointer rounded-sm border border-border bg-surface px-3 py-2 font-display text-xs font-semibold uppercase tracking-[0.24em] text-foreground transition-colors hover:border-accent hover:text-accent sm:px-4 sm:py-2.5">
                 Menu
               </summary>
               <div className="absolute right-0 mt-3 w-[min(18rem,calc(100vw-2rem))] border border-border bg-surface p-4 shadow-subtle">
-                <nav aria-label="Mobile primary" className="flex flex-col gap-3 text-sm">
+                <nav
+                  aria-label="Mobile primary"
+                  className="flex flex-col gap-3 text-sm"
+                >
                   {masterclass.navigation.map((item) => (
                     <a
                       key={item.label}

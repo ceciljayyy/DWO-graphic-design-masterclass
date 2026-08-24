@@ -1,15 +1,16 @@
 import type { NavigationItem } from "@/types/navigation";
 
+import { masterclass } from "@/lib/masterclass";
+
 export const siteConfig = {
-  name: "DWO Graphic Design Masterclass",
-  description:
-    "Premium registration and payment platform foundation for the DWO Graphic Design Masterclass.",
+  name: masterclass.name,
+  description: masterclass.description,
 } as const;
 
 export const mainNavigation: NavigationItem[] = [
   { label: "Overview", href: "/" },
-  { label: "Structure", href: "#structure" },
-  { label: "Setup", href: "#details" },
+  { label: "Skills", href: "#learn" },
+  { label: "Details", href: "#details" },
 ];
 
 export const phaseOneHighlights = [
