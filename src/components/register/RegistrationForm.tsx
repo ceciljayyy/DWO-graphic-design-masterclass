@@ -2,10 +2,23 @@
 
 import type { FormEvent } from "react";
 import { useId, useState } from "react";
+import type { CountryCode } from "libphonenumber-js";
 
+import { CityCombobox, CountryPhoneInput } from "@/components/forms";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { masterclass } from "@/lib/masterclass";
-import { registrationConfiguration, validateRegistrationInput } from "@/lib/registration";
+import {
+  getDefaultPhoneCountry,
+  isInvalidPhone,
+  validatePhoneForCountry,
+} from "@/lib/phone";
+import {
+  registrationConfiguration,
+  validateEmailAddress,
+  validateFullName,
+  validateRegistrationInput,
+} from "@/lib/registration";
+import { isCityInCountry } from "@/lib/locations";
 import type {
   RegistrationApiError,
   RegistrationCreateResponseData,
@@ -16,6 +29,7 @@ import type {
 const initialFormValues: RegistrationFormValues = {
   fullName: "",
   email: "",
+  countryCode: getDefaultPhoneCountry(),
   phone: "",
   whatsapp: "",
   location: "",
@@ -211,18 +225,100 @@ function RegistrationSuccess({
   );
 }
 
+function validateField(
+  name: FieldName,
+  values: RegistrationFormValues,
+): string | undefined {
+  if (name === "fullName") {
+    const result = validateFullName(values.fullName);
+    return result.success ? undefined : result.error;
+  }
+
+  if (name === "email") {
+    const result = validateEmailAddress(values.email);
+    return result.success ? undefined : result.error;
+  }
+
+  if (name === "phone") {
+    const result = validatePhoneForCountry(values.phone, values.countryCode, {
+      required: true,
+      fieldLabel: "phone",
+    });
+    return isInvalidPhone(result) ? result.error : undefined;
+  }
+
+  if (name === "whatsapp") {
+    const result = validatePhoneForCountry(
+      values.whatsapp ?? "",
+      values.countryCode,
+      {
+        required: false,
+        fieldLabel: "whatsapp",
+      },
+    );
+    return isInvalidPhone(result) ? result.error : undefined;
+  }
+
+  if (name === "location") {
+    if (!values.location.trim()) {
+      return "Please select your city or town.";
+    }
+    if (!isCityInCountry(values.location, values.countryCode)) {
+      return "Please select your city or town.";
+    }
+    return undefined;
+  }
+
+  if (name === "experienceLevel") {
+    if (!values.experienceLevel) {
+      return "Please select your experience level.";
+    }
+    return undefined;
+  }
+
+  return undefined;
+}
+
 export function RegistrationForm() {
   const formId = useId();
-  const [formValues, setFormValues] = useState<RegistrationFormValues>(initialFormValues);
-  const [fieldErrors, setFieldErrors] = useState<RegistrationValidationErrors>({});
+  const [formValues, setFormValues] =
+    useState<RegistrationFormValues>(initialFormValues);
+  const [fieldErrors, setFieldErrors] = useState<RegistrationValidationErrors>(
+    {},
+  );
   const [formError, setFormError] = useState<string | null>(null);
-  const [successData, setSuccessData] = useState<RegistrationCreateResponseData | null>(null);
+  const [successData, setSuccessData] =
+    useState<RegistrationCreateResponseData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function updateField(name: FieldName, value: string) {
     setFormValues((current) => ({ ...current, [name]: value }));
     setFieldErrors((current) => ({ ...current, [name]: undefined }));
     setFormError(null);
+  }
+
+  function handleCountryChange(nextCountry: CountryCode) {
+    setFormValues((current) => ({
+      ...current,
+      countryCode: nextCountry,
+      location: "",
+    }));
+    setFieldErrors((current) => ({
+      ...current,
+      countryCode: undefined,
+      location: undefined,
+      phone: undefined,
+      whatsapp: undefined,
+    }));
+    setFormError(null);
+  }
+
+  function handleBlur(name: FieldName) {
+    setFormValues((current) => {
+      const message = validateField(name, current);
+      setFieldErrors((errors) => ({ ...errors, [name]: message }));
+      return current;
+    });
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -243,7 +339,15 @@ export function RegistrationForm() {
       const response = await fetch("/api/registrations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validation.data),
+        body: JSON.stringify({
+          fullName: validation.data.fullName,
+          email: validation.data.email,
+          countryCode: validation.data.countryCode,
+          phone: validation.data.phone,
+          whatsapp: validation.data.whatsapp,
+          location: validation.data.location,
+          experienceLevel: validation.data.experienceLevel,
+        }),
       });
 
       const payload = (await response.json()) as
@@ -265,18 +369,16 @@ export function RegistrationForm() {
 
       setSuccessData(payload.data);
     } catch {
-      setFormError("Something went wrong while submitting the form. Please try again.");
+      setFormError(
+        "Something went wrong while submitting the form. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
   }
 
   if (successData) {
-    return (
-      <RegistrationSuccess
-        successData={successData}
-      />
-    );
+    return <RegistrationSuccess successData={successData} />;
   }
 
   return (
@@ -296,7 +398,10 @@ export function RegistrationForm() {
 
       <form onSubmit={handleSubmit} noValidate className="grid gap-5">
         <div>
-          <label htmlFor={`${formId}-fullName`} className="text-sm font-medium text-foreground">
+          <label
+            htmlFor={`${formId}-fullName`}
+            className="text-sm font-medium text-foreground"
+          >
             Full Name <span className="text-accent">*</span>
           </label>
           <input
@@ -306,17 +411,26 @@ export function RegistrationForm() {
             autoComplete="name"
             required
             aria-invalid={Boolean(fieldErrors.fullName)}
-            aria-describedby={fieldErrors.fullName ? `${formId}-fullName-error` : undefined}
+            aria-describedby={
+              fieldErrors.fullName ? `${formId}-fullName-error` : undefined
+            }
             value={formValues.fullName}
             onChange={(event) => updateField("fullName", event.target.value)}
+            onBlur={() => handleBlur("fullName")}
             className={fieldClassName}
-            placeholder="Enter your full name"
+            placeholder="John Mensah"
           />
-          <FieldError id={`${formId}-fullName-error`} message={fieldErrors.fullName} />
+          <FieldError
+            id={`${formId}-fullName-error`}
+            message={fieldErrors.fullName}
+          />
         </div>
 
         <div>
-          <label htmlFor={`${formId}-email`} className="text-sm font-medium text-foreground">
+          <label
+            htmlFor={`${formId}-email`}
+            className="text-sm font-medium text-foreground"
+          >
             Email Address <span className="text-accent">*</span>
           </label>
           <input
@@ -327,75 +441,55 @@ export function RegistrationForm() {
             autoComplete="email"
             required
             aria-invalid={Boolean(fieldErrors.email)}
-            aria-describedby={fieldErrors.email ? `${formId}-email-error` : undefined}
+            aria-describedby={
+              fieldErrors.email ? `${formId}-email-error` : undefined
+            }
             value={formValues.email}
             onChange={(event) => updateField("email", event.target.value)}
+            onBlur={() => handleBlur("email")}
             className={fieldClassName}
             placeholder="you@example.com"
           />
-          <FieldError id={`${formId}-email-error`} message={fieldErrors.email} />
+          <FieldError
+            id={`${formId}-email-error`}
+            message={fieldErrors.email}
+          />
         </div>
 
-        <div>
-          <label htmlFor={`${formId}-phone`} className="text-sm font-medium text-foreground">
-            Phone Number <span className="text-accent">*</span>
-          </label>
-          <input
-            id={`${formId}-phone`}
-            name="phone"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            required
-            aria-invalid={Boolean(fieldErrors.phone)}
-            aria-describedby={fieldErrors.phone ? `${formId}-phone-error` : undefined}
-            value={formValues.phone}
-            onChange={(event) => updateField("phone", event.target.value)}
-            className={fieldClassName}
-            placeholder="+233 59 000 0000"
-          />
-          <FieldError id={`${formId}-phone-error`} message={fieldErrors.phone} />
-        </div>
+        <CountryPhoneInput
+          id={`${formId}-phone`}
+          label="Phone Number"
+          required
+          countryCode={formValues.countryCode}
+          value={formValues.phone}
+          error={fieldErrors.phone}
+          onCountryChange={handleCountryChange}
+          onChange={(value) => updateField("phone", value)}
+          onBlur={() => handleBlur("phone")}
+        />
 
-        <div>
-          <label htmlFor={`${formId}-whatsapp`} className="text-sm font-medium text-foreground">
-            WhatsApp Number <span className="text-muted">(optional)</span>
-          </label>
-          <input
-            id={`${formId}-whatsapp`}
-            name="whatsapp"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            aria-invalid={Boolean(fieldErrors.whatsapp)}
-            aria-describedby={fieldErrors.whatsapp ? `${formId}-whatsapp-error` : undefined}
-            value={formValues.whatsapp}
-            onChange={(event) => updateField("whatsapp", event.target.value)}
-            className={fieldClassName}
-            placeholder="+233 53 000 0000"
-          />
-          <FieldError id={`${formId}-whatsapp-error`} message={fieldErrors.whatsapp} />
-        </div>
+        <CountryPhoneInput
+          id={`${formId}-whatsapp`}
+          label="WhatsApp Number"
+          optionalHint
+          countryCode={formValues.countryCode}
+          value={formValues.whatsapp ?? ""}
+          error={fieldErrors.whatsapp}
+          onCountryChange={handleCountryChange}
+          onChange={(value) => updateField("whatsapp", value)}
+          onBlur={() => handleBlur("whatsapp")}
+        />
 
-        <div>
-          <label htmlFor={`${formId}-location`} className="text-sm font-medium text-foreground">
-            City / Town <span className="text-accent">*</span>
-          </label>
-          <input
-            id={`${formId}-location`}
-            name="location"
-            type="text"
-            autoComplete="address-level2"
-            required
-            aria-invalid={Boolean(fieldErrors.location)}
-            aria-describedby={fieldErrors.location ? `${formId}-location-error` : undefined}
-            value={formValues.location}
-            onChange={(event) => updateField("location", event.target.value)}
-            className={fieldClassName}
-            placeholder="Accra"
-          />
-          <FieldError id={`${formId}-location-error`} message={fieldErrors.location} />
-        </div>
+        <CityCombobox
+          id={`${formId}-location`}
+          label="City / Town"
+          required
+          countryCode={formValues.countryCode}
+          value={formValues.location}
+          error={fieldErrors.location}
+          onChange={(value) => updateField("location", value)}
+          onBlur={() => handleBlur("location")}
+        />
 
         <div>
           <label
@@ -410,10 +504,15 @@ export function RegistrationForm() {
             required
             aria-invalid={Boolean(fieldErrors.experienceLevel)}
             aria-describedby={
-              fieldErrors.experienceLevel ? `${formId}-experienceLevel-error` : undefined
+              fieldErrors.experienceLevel
+                ? `${formId}-experienceLevel-error`
+                : undefined
             }
             value={formValues.experienceLevel}
-            onChange={(event) => updateField("experienceLevel", event.target.value)}
+            onChange={(event) =>
+              updateField("experienceLevel", event.target.value)
+            }
+            onBlur={() => handleBlur("experienceLevel")}
             className={fieldClassName}
           >
             <option value="" disabled>

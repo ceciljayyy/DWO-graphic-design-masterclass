@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { createRegistrationRecord, isDuplicateEmailError } from "@/lib/registration.server";
+import {
+  createRegistrationRecord,
+  getDuplicateRegistrationMessage,
+  isDuplicateEmailError,
+} from "@/lib/registration.server";
+import { isDatabaseConnectionError } from "@/lib/prisma";
 import { validateRegistrationInput } from "@/lib/registration";
 import type { RegistrationApiError, RegistrationApiSuccess } from "@/types/registration";
 
@@ -65,12 +70,33 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: "DUPLICATE_REGISTRATION",
-            message: "A registration already exists with this email address.",
+            message: getDuplicateRegistrationMessage(error),
+            fieldErrors: {
+              email: "This email is already registered.",
+            },
           },
         },
         { status: 409 },
       );
     }
+
+    if (isDatabaseConnectionError(error)) {
+      console.error("[registrations] database unavailable", error);
+
+      return NextResponse.json<RegistrationApiError>(
+        {
+          success: false,
+          error: {
+            code: "DATABASE_UNAVAILABLE",
+            message:
+              "The registration database is temporarily unavailable. Confirm MySQL/Docker is running, then try again.",
+          },
+        },
+        { status: 503 },
+      );
+    }
+
+    console.error("[registrations] create failed", error);
 
     return NextResponse.json<RegistrationApiError>(
       {

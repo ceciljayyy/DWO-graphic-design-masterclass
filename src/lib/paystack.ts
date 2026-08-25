@@ -43,6 +43,14 @@ function getPaystackSecretKey() {
     );
   }
 
+  // Full Paystack keys are much longer than the truncated dashboard preview.
+  if (secret.length < 40 || !secret.startsWith("sk_")) {
+    throw new PaystackError(
+      "Paystack secret key looks incomplete. Copy the full Test Secret Key from the Paystack dashboard (use the copy icon), paste it into .env.local as PAYSTACK_SECRET_KEY, then restart the dev server.",
+      "PAYSTACK_KEY_INVALID",
+    );
+  }
+
   return secret;
 }
 

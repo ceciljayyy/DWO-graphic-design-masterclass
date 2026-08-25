@@ -1,9 +1,22 @@
+import { isCityInCountry } from "@/lib/locations";
 import { masterclass, registrationFee } from "@/lib/masterclass";
-import { experienceLevelOptions, type ExperienceLevel, type RegistrationFormValues, type RegistrationValidationErrors } from "@/types/registration";
+import {
+  getDefaultPhoneCountry,
+  isInvalidPhone,
+  isSupportedCountryCode,
+  validatePhoneForCountry,
+} from "@/lib/phone";
+import {
+  experienceLevelOptions,
+  type ExperienceLevel,
+  type RegistrationFormValues,
+  type RegistrationValidationErrors,
+} from "@/types/registration";
 
 export type NormalizedRegistrationInput = {
   fullName: string;
   email: string;
+  countryCode: string;
   phone: string;
   whatsapp: string | null;
   location: string;
@@ -18,21 +31,65 @@ export const registrationConfiguration = {
   masterclassName: masterclass.name,
   fee: registrationFee,
   experienceLevels: experienceLevelOptions,
+  defaultCountryCode: getDefaultPhoneCountry(),
 } as const;
+
+const FULL_NAME_PATTERN =
+  /^[\p{L}][\p{L}\p{M}'’.\-]*(?: [\p{L}][\p{L}\p{M}'’.\-]*)+$/u;
+
+const EMAIL_PATTERN =
+  /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i;
 
 export function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
-}
-
-export function normalizePhone(value: string) {
-  return value.trim().replace(/[\s()-]+/g, "");
 }
 
 export function normalizeText(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
 
-export function validateRegistrationInput(input: unknown): RegistrationValidationResult {
+export function normalizeFullName(value: string) {
+  return normalizeText(value);
+}
+
+export function validateFullName(value: string) {
+  const fullName = normalizeFullName(value);
+
+  if (!fullName || fullName.length < 2) {
+    return { success: false as const, error: "Please enter your full name." };
+  }
+
+  // Require at least first + last name style token, letters only with allowed separators.
+  if (!FULL_NAME_PATTERN.test(fullName) || /\d/.test(fullName)) {
+    return { success: false as const, error: "Please enter your full name." };
+  }
+
+  return { success: true as const, value: fullName };
+}
+
+export function validateEmailAddress(value: string) {
+  const email = normalizeEmail(value);
+
+  if (!email) {
+    return {
+      success: false as const,
+      error: "Please enter a valid email address.",
+    };
+  }
+
+  if (!EMAIL_PATTERN.test(email) || email.includes("..")) {
+    return {
+      success: false as const,
+      error: "Please enter a valid email address.",
+    };
+  }
+
+  return { success: true as const, value: email };
+}
+
+export function validateRegistrationInput(
+  input: unknown,
+): RegistrationValidationResult {
   if (!input || typeof input !== "object") {
     return { success: false, errors: { form: "Invalid request payload." } };
   }
@@ -40,45 +97,69 @@ export function validateRegistrationInput(input: unknown): RegistrationValidatio
   const raw = input as Partial<Record<keyof RegistrationFormValues, unknown>>;
   const errors: RegistrationValidationErrors = {};
 
-  const fullName = typeof raw.fullName === "string" ? normalizeText(raw.fullName) : "";
-  const email = typeof raw.email === "string" ? normalizeEmail(raw.email) : "";
-  const phone = typeof raw.phone === "string" ? normalizePhone(raw.phone) : "";
-  const whatsapp = typeof raw.whatsapp === "string" ? normalizePhone(raw.whatsapp) : "";
-  const location = typeof raw.location === "string" ? normalizeText(raw.location) : "";
+  const fullNameResult = validateFullName(
+    typeof raw.fullName === "string" ? raw.fullName : "",
+  );
+  const emailResult = validateEmailAddress(
+    typeof raw.email === "string" ? raw.email : "",
+  );
+
+  const countryCode =
+    typeof raw.countryCode === "string" && raw.countryCode.trim()
+      ? raw.countryCode.trim().toUpperCase()
+      : getDefaultPhoneCountry();
+
+  const phoneRaw = typeof raw.phone === "string" ? raw.phone : "";
+  const whatsappRaw = typeof raw.whatsapp === "string" ? raw.whatsapp : "";
+  const location =
+    typeof raw.location === "string" ? normalizeText(raw.location) : "";
   const experienceLevel =
-    typeof raw.experienceLevel === "string" ? raw.experienceLevel.toUpperCase() : "";
+    typeof raw.experienceLevel === "string"
+      ? raw.experienceLevel.toUpperCase()
+      : "";
 
-  if (!fullName) {
-    errors.fullName = "Please enter your full name.";
-  } else if (fullName.length < 2) {
-    errors.fullName = "Please enter a valid full name.";
+  if (!fullNameResult.success) {
+    errors.fullName = fullNameResult.error;
   }
 
-  if (!email) {
-    errors.email = "Please enter your email address.";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = "Please enter a valid email address.";
+  if (!emailResult.success) {
+    errors.email = emailResult.error;
   }
 
-  if (!phone) {
-    errors.phone = "Please enter your phone number.";
-  } else if (!/^[+]?([0-9][\s-]?){7,15}[0-9]$/.test(phone.replace(/\s+/g, ""))) {
-    errors.phone = "Please enter a valid phone number.";
+  if (!isSupportedCountryCode(countryCode)) {
+    errors.countryCode = "Please select a valid country.";
   }
 
-  if (whatsapp && !/^[+]?([0-9][\s-]?){7,15}[0-9]$/.test(whatsapp.replace(/\s+/g, ""))) {
-    errors.whatsapp = "Please enter a valid WhatsApp number or leave it blank.";
+  const phoneResult = validatePhoneForCountry(phoneRaw, countryCode, {
+    required: true,
+    fieldLabel: "phone",
+  });
+  if (isInvalidPhone(phoneResult)) {
+    errors.phone = phoneResult.error;
+  }
+
+  const whatsappResult = validatePhoneForCountry(whatsappRaw, countryCode, {
+    required: false,
+    fieldLabel: "whatsapp",
+  });
+  if (isInvalidPhone(whatsappResult)) {
+    errors.whatsapp = whatsappResult.error;
   }
 
   if (!location) {
-    errors.location = "Please enter your city or town.";
-  } else if (location.length < 2) {
-    errors.location = "Please enter a valid city or town.";
+    errors.location = "Please select your city or town.";
+  } else if (
+    isSupportedCountryCode(countryCode) &&
+    !isCityInCountry(location, countryCode)
+  ) {
+    errors.location = "Please select your city or town.";
   }
 
   if (!experienceLevel) {
     errors.experienceLevel = "Please select your experience level.";
-  } else if (!experienceLevelOptions.includes(experienceLevel as ExperienceLevel)) {
+  } else if (
+    !experienceLevelOptions.includes(experienceLevel as ExperienceLevel)
+  ) {
     errors.experienceLevel = "Please select a valid experience level.";
   }
 
@@ -89,10 +170,14 @@ export function validateRegistrationInput(input: unknown): RegistrationValidatio
   return {
     success: true,
     data: {
-      fullName,
-      email,
-      phone,
-      whatsapp: whatsapp || null,
+      fullName: fullNameResult.success ? fullNameResult.value : "",
+      email: emailResult.success ? emailResult.value : "",
+      countryCode,
+      phone: phoneResult.ok ? phoneResult.e164 : "",
+      whatsapp:
+        whatsappResult.ok && whatsappResult.e164
+          ? whatsappResult.e164
+          : null,
       location,
       experienceLevel: experienceLevel as ExperienceLevel,
     },

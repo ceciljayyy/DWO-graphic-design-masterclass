@@ -369,10 +369,21 @@ export function toSafePaymentError(error: unknown) {
   }
 
   if (error instanceof PaystackError) {
+    const status =
+      error.code === "PAYSTACK_NOT_CONFIGURED" ||
+      error.code === "PAYSTACK_KEY_INVALID"
+        ? 503
+        : 502;
+
+    const message =
+      /invalid key/i.test(error.message)
+        ? "Paystack rejected the API key. Copy the full Test Secret Key from Paystack (use the copy icon — do not type from a screenshot), paste it into .env.local, then restart the dev server."
+        : error.message;
+
     return {
       code: error.code,
-      message: error.message,
-      status: error.code === "PAYSTACK_NOT_CONFIGURED" ? 503 : 502,
+      message,
+      status,
     };
   }
 

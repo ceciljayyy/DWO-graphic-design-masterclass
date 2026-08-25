@@ -9,13 +9,16 @@ export type PaymentStatus = (typeof paymentStatusOptions)[number];
 export type RegistrationFormValues = {
   fullName: string;
   email: string;
+  countryCode: string;
   phone: string;
   whatsapp?: string;
   location: string;
   experienceLevel: ExperienceLevel | "";
 };
 
-export type RegistrationValidationErrors = Partial<Record<keyof RegistrationFormValues | "form", string>>;
+export type RegistrationValidationErrors = Partial<
+  Record<keyof RegistrationFormValues | "form", string>
+>;
 
 export type RegistrationCreateResponseData = {
   registrationId: string;

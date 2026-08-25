@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { downloadRegistrationReceipt } from "@/lib/receipt";
 import type {
   PaymentApiError,
   PaymentSummaryData,
@@ -252,9 +253,18 @@ export function PaymentVerification({ reference }: PaymentVerificationProps) {
                 </div>
               </div>
 
-              <ButtonLink href="/" className="min-h-12 w-full sm:w-auto">
-                Back to Home
-              </ButtonLink>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button
+                  type="button"
+                  onClick={() => downloadRegistrationReceipt(summary)}
+                  className="min-h-12"
+                >
+                  Download Receipt
+                </Button>
+                <ButtonLink href="/" variant="secondary" className="min-h-12">
+                  Back to Home
+                </ButtonLink>
+              </div>
             </div>
           ) : null}
 
