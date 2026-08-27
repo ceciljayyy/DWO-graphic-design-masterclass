@@ -197,7 +197,6 @@ export async function getRegistrationById(id: string) {
 
 export async function getDashboardAnalytics() {
   const prisma = getPrismaClient();
-  const fourteenDaysAgo = new Date(Date.now() - 13 * 24 * 60 * 60 * 1000);
 
   const [
     totalRegistrations,
@@ -207,7 +206,6 @@ export async function getDashboardAnalytics() {
     revenueAggregate,
     latestRegistrations,
     recentPaid,
-    trendRows,
   ] = await Promise.all([
     prisma.registration.count(),
     prisma.registration.count({ where: { paymentStatus: "PAID" } }),
@@ -241,26 +239,7 @@ export async function getDashboardAnalytics() {
         paidAt: true,
       },
     }),
-    prisma.registration.findMany({
-      where: { createdAt: { gte: fourteenDaysAgo } },
-      select: { createdAt: true },
-      orderBy: { createdAt: "asc" },
-    }),
   ]);
-
-  const trendMap = new Map<string, number>();
-  for (let i = 13; i >= 0; i -= 1) {
-    const day = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-    const key = day.toISOString().slice(0, 10);
-    trendMap.set(key, 0);
-  }
-
-  for (const row of trendRows) {
-    const key = row.createdAt.toISOString().slice(0, 10);
-    if (trendMap.has(key)) {
-      trendMap.set(key, (trendMap.get(key) ?? 0) + 1);
-    }
-  }
 
   const revenue = Number(revenueAggregate._sum.amount ?? 0);
 
@@ -287,10 +266,6 @@ export async function getDashboardAnalytics() {
       ...item,
       amount: item.amount.toString(),
       paidAt: item.paidAt?.toISOString() ?? null,
-    })),
-    registrationTrend: Array.from(trendMap.entries()).map(([date, count]) => ({
-      date,
-      count,
     })),
   };
 }

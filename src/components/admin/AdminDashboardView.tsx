@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { PaymentStatusBadge } from "@/components/admin/PaymentStatusBadge";
+import { RegistrationAnalytics } from "@/components/admin/RegistrationAnalytics";
 import { formatAdminDate, formatAmountDisplay } from "@/lib/admin/format";
+import type { RegistrationAnalytics as RegistrationAnalyticsData } from "@/lib/admin/analytics";
 import { masterclass } from "@/lib/masterclass";
 import { cn } from "@/lib/utils";
 
@@ -9,9 +11,13 @@ type DashboardData = Awaited<
   ReturnType<typeof import("@/lib/admin/registrations").getDashboardAnalytics>
 >;
 
-export function AdminDashboardView({ data }: { data: DashboardData }) {
-  const maxTrend = Math.max(1, ...data.registrationTrend.map((item) => item.count));
-
+export function AdminDashboardView({
+  data,
+  analytics,
+}: {
+  data: DashboardData;
+  analytics: RegistrationAnalyticsData;
+}) {
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -33,10 +39,22 @@ export function AdminDashboardView({ data }: { data: DashboardData }) {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {[
-          { label: "Total Registrations", value: String(data.totals.totalRegistrations) },
-          { label: "Paid Registrations", value: String(data.totals.paidRegistrations) },
-          { label: "Pending Payments", value: String(data.totals.pendingRegistrations) },
-          { label: "Failed Payments", value: String(data.totals.failedRegistrations) },
+          {
+            label: "Total Registrations",
+            value: String(data.totals.totalRegistrations),
+          },
+          {
+            label: "Paid Registrations",
+            value: String(data.totals.paidRegistrations),
+          },
+          {
+            label: "Pending Payments",
+            value: String(data.totals.pendingRegistrations),
+          },
+          {
+            label: "Failed Payments",
+            value: String(data.totals.failedRegistrations),
+          },
           { label: "Total Revenue", value: data.totals.revenueDisplay },
         ].map((card) => (
           <article key={card.label} className="border border-border bg-surface p-5">
@@ -50,28 +68,8 @@ export function AdminDashboardView({ data }: { data: DashboardData }) {
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <section className="border border-border bg-surface p-5">
-          <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-accent">
-            Registrations · last 14 days
-          </h2>
-          <div className="mt-6 flex h-40 items-end gap-1.5">
-            {data.registrationTrend.map((item) => (
-              <div key={item.date} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                <div
-                  className="w-full rounded-sm bg-accent/80"
-                  style={{
-                    height: `${Math.max(6, (item.count / maxTrend) * 100)}%`,
-                  }}
-                  title={`${item.date}: ${item.count}`}
-                />
-                <span className="hidden text-[10px] text-muted sm:inline">
-                  {item.date.slice(8)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
+      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+        <RegistrationAnalytics initialData={analytics} />
 
         <section className="border border-border bg-surface p-5">
           <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-accent">
@@ -114,7 +112,9 @@ export function AdminDashboardView({ data }: { data: DashboardData }) {
               {masterclass.name}
             </p>
             <p className="mt-2 text-sm text-muted">{masterclass.price.display}</p>
-            <p className="mt-1 text-sm text-muted">{masterclass.coursePeriod.display}</p>
+            <p className="mt-1 text-sm text-muted">
+              {masterclass.coursePeriod.display}
+            </p>
           </div>
         </section>
       </div>
@@ -125,7 +125,10 @@ export function AdminDashboardView({ data }: { data: DashboardData }) {
             <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-accent">
               Latest registrations
             </h2>
-            <Link href="/admin/registrations" className="text-xs text-muted hover:text-accent">
+            <Link
+              href="/admin/registrations"
+              className="text-xs text-muted hover:text-accent"
+            >
               View all
             </Link>
           </div>
@@ -134,7 +137,10 @@ export function AdminDashboardView({ data }: { data: DashboardData }) {
           ) : (
             <ul className="mt-5 divide-y divide-border">
               {data.latestRegistrations.map((item) => (
-                <li key={item.id} className="flex items-start justify-between gap-3 py-3">
+                <li
+                  key={item.id}
+                  className="flex items-start justify-between gap-3 py-3"
+                >
                   <div className="min-w-0">
                     <Link
                       href={`/admin/registrations/${item.id}`}
@@ -143,7 +149,8 @@ export function AdminDashboardView({ data }: { data: DashboardData }) {
                       {item.fullName}
                     </Link>
                     <p className="mt-1 text-xs text-muted">
-                      {item.registrationReference} · {formatAdminDate(item.createdAt)}
+                      {item.registrationReference} ·{" "}
+                      {formatAdminDate(item.createdAt)}
                     </p>
                   </div>
                   <PaymentStatusBadge status={item.paymentStatus} />
@@ -162,7 +169,10 @@ export function AdminDashboardView({ data }: { data: DashboardData }) {
           ) : (
             <ul className="mt-5 divide-y divide-border">
               {data.recentPaid.map((item) => (
-                <li key={item.id} className="flex items-start justify-between gap-3 py-3">
+                <li
+                  key={item.id}
+                  className="flex items-start justify-between gap-3 py-3"
+                >
                   <div className="min-w-0">
                     <Link
                       href={`/admin/registrations/${item.id}`}
@@ -171,7 +181,8 @@ export function AdminDashboardView({ data }: { data: DashboardData }) {
                       {item.fullName}
                     </Link>
                     <p className="mt-1 text-xs text-muted">
-                      {item.registrationReference} · {formatAdminDate(item.paidAt)}
+                      {item.registrationReference} ·{" "}
+                      {formatAdminDate(item.paidAt)}
                     </p>
                   </div>
                   <p className="text-sm font-medium text-accent">

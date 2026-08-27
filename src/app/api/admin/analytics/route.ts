@@ -1,17 +1,28 @@
 import { NextResponse } from "next/server";
 
+import { parseAnalyticsRange } from "@/lib/admin/analytics";
+import { getRegistrationAnalytics } from "@/lib/admin/analytics.server";
 import { requireAdminApi } from "@/lib/auth/admin";
-import { getDashboardAnalytics } from "@/lib/admin/registrations";
 
-export async function GET() {
-  const { admin, error } = await requireAdminApi();
+export async function GET(request: Request) {
+  const { error } = await requireAdminApi();
   if (error) {
     return error;
   }
 
   try {
-    const data = await getDashboardAnalytics();
-    return NextResponse.json({ success: true, data, admin });
+    const { searchParams } = new URL(request.url);
+    const range = parseAnalyticsRange(searchParams.get("range"));
+    const data = await getRegistrationAnalytics(range);
+
+    return NextResponse.json(
+      { success: true, data },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      },
+    );
   } catch {
     return NextResponse.json(
       {

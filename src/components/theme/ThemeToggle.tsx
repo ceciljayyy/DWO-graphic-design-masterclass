@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { cn } from "@/lib/utils";
 
@@ -40,19 +42,36 @@ function MoonIcon() {
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setMounted(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
   const isDark = theme === "dark";
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={
+        mounted
+          ? isDark
+            ? "Switch to light mode"
+            : "Switch to dark mode"
+          : "Toggle color theme"
+      }
       className={cn(
         "inline-flex h-9 w-9 items-center justify-center rounded-sm border border-border bg-surface text-muted transition-colors hover:border-accent hover:text-foreground",
         className,
       )}
+      suppressHydrationWarning
     >
-      {isDark ? <SunIcon /> : <MoonIcon />}
+      {/* Keep SSR/first paint stable; swap icon after mount. */}
+      <span className="inline-flex h-4 w-4 items-center justify-center" suppressHydrationWarning>
+        {!mounted || isDark ? <SunIcon /> : <MoonIcon />}
+      </span>
     </button>
   );
 }

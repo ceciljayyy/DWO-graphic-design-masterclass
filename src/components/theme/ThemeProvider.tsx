@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -12,6 +13,7 @@ import {
 export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "dwo-theme";
+const DEFAULT_THEME: Theme = "dark";
 
 type ThemeContextValue = {
   theme: Theme;
@@ -23,7 +25,11 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
-  localStorage.setItem(STORAGE_KEY, theme);
+  try {
+    localStorage.setItem(STORAGE_KEY, theme);
+  } catch {
+    // Ignore storage errors in restricted environments.
+  }
 }
 
 function readStoredTheme(): Theme {
@@ -36,23 +42,26 @@ function readStoredTheme(): Theme {
     // Ignore storage errors in restricted environments.
   }
 
-  return "dark";
-}
-
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") {
-    return "dark";
-  }
-
-  return readStoredTheme();
+  return DEFAULT_THEME;
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  // Always match the SSR default first. Sync from localStorage only after mount
+  // so ThemeToggle markup does not mismatch during hydration.
+  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
+
+  useEffect(() => {
+    const stored = readStoredTheme();
+    applyTheme(stored);
+    const frame = window.requestAnimationFrame(() => {
+      setThemeState(stored);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   const setTheme = useCallback((next: Theme) => {
-    setThemeState(next);
     applyTheme(next);
+    setThemeState(next);
   }, []);
 
   const toggleTheme = useCallback(() => {
