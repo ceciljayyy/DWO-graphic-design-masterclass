@@ -73,7 +73,7 @@ export function AdminRegistrationsView({
         <input
           name="q"
           defaultValue={query.q ?? ""}
-          placeholder="Search name, email, phone, ref"
+          placeholder="Search name, email, WhatsApp, phone, ref"
           className="min-h-11 rounded-sm border border-border bg-background px-3 text-sm outline-none focus:border-accent lg:col-span-2"
         />
         <select
@@ -146,7 +146,7 @@ export function AdminRegistrationsView({
                   <th className="px-4 py-3 font-medium">Reference</th>
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 font-medium">Phone</th>
+                  <th className="px-4 py-3 font-medium">WhatsApp</th>
                   <th className="px-4 py-3 font-medium">Level</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Amount</th>
@@ -166,7 +166,7 @@ export function AdminRegistrationsView({
                     </td>
                     <td className="px-4 py-3">{item.fullName}</td>
                     <td className="px-4 py-3">{item.email}</td>
-                    <td className="px-4 py-3">{item.phone}</td>
+                    <td className="px-4 py-3">{item.whatsapp || item.phone || "—"}</td>
                     <td className="px-4 py-3">
                       {formatExperienceLevel(item.experienceLevel)}
                     </td>
@@ -198,7 +198,9 @@ export function AdminRegistrationsView({
                   <PaymentStatusBadge status={item.paymentStatus} />
                 </div>
                 <p className="mt-3 text-sm text-muted">{item.email}</p>
-                <p className="mt-1 text-sm text-muted">{item.phone}</p>
+                <p className="mt-1 text-sm text-muted">
+                  {item.whatsapp || item.phone || "—"}
+                </p>
                 <div className="mt-3 flex items-center justify-between text-sm">
                   <span>{formatAmountDisplay(item.amount)}</span>
                   <span className="text-muted">{formatAdminDate(item.createdAt)}</span>

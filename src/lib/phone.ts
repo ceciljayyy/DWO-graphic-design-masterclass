@@ -126,7 +126,7 @@ export function validatePhoneForCountry(
       ok: false,
       error:
         fieldLabel === "whatsapp"
-          ? "Please enter a valid WhatsApp number or leave this field empty."
+          ? "Please enter your WhatsApp number."
           : "Please enter your phone number.",
     };
   }
@@ -144,7 +144,7 @@ export function validatePhoneForCountry(
     if (fieldLabel === "whatsapp") {
       return {
         ok: false,
-        error: "Please enter a valid WhatsApp number or leave this field empty.",
+        error: "Please enter a valid WhatsApp number.",
       };
     }
 

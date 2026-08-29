@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { CountryCode } from "libphonenumber-js";
 
 import { CityCombobox, CountryPhoneInput } from "@/components/forms";
@@ -19,6 +19,11 @@ import {
   validateRegistrationInput,
 } from "@/lib/registration";
 import { isCityInCountry } from "@/lib/locations";
+import {
+  clearRegistrationDraft,
+  loadRegistrationDraft,
+  saveRegistrationDraft,
+} from "@/lib/registration-draft";
 import type {
   RegistrationApiError,
   RegistrationCreateResponseData,
@@ -240,8 +245,8 @@ function validateField(
   }
 
   if (name === "phone") {
-    const result = validatePhoneForCountry(values.phone, values.countryCode, {
-      required: true,
+    const result = validatePhoneForCountry(values.phone ?? "", values.countryCode, {
+      required: false,
       fieldLabel: "phone",
     });
     return isInvalidPhone(result) ? result.error : undefined;
@@ -249,10 +254,10 @@ function validateField(
 
   if (name === "whatsapp") {
     const result = validatePhoneForCountry(
-      values.whatsapp ?? "",
+      values.whatsapp,
       values.countryCode,
       {
-        required: false,
+        required: true,
         fieldLabel: "whatsapp",
       },
     );
@@ -290,6 +295,29 @@ export function RegistrationForm() {
   const [successData, setSuccessData] =
     useState<RegistrationCreateResponseData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const draftReady = useRef(false);
+
+  useEffect(() => {
+    const draft = loadRegistrationDraft();
+    if (draft) {
+      setFormValues(draft);
+      setDraftRestored(true);
+    }
+    draftReady.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!draftReady.current) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      saveRegistrationDraft(formValues);
+    }, 400);
+
+    return () => window.clearTimeout(timeout);
+  }, [formValues]);
 
   function updateField(name: FieldName, value: string) {
     setFormValues((current) => ({ ...current, [name]: value }));
@@ -367,6 +395,8 @@ export function RegistrationForm() {
         return;
       }
 
+      clearRegistrationDraft();
+      setDraftRestored(false);
       setSuccessData(payload.data);
     } catch {
       setFormError(
@@ -392,9 +422,31 @@ export function RegistrationForm() {
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted sm:text-base">
           Submit the form to create your pending registration. Payment is not
-          collected in this step.
+          collected in this step. Your progress is saved on this device if you
+          refresh or return later.
         </p>
       </div>
+
+      {draftRestored ? (
+        <div className="mb-5 flex flex-col gap-3 border border-border bg-background px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted">
+            We restored your previous entries from this device.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              clearRegistrationDraft();
+              setFormValues(initialFormValues);
+              setFieldErrors({});
+              setFormError(null);
+              setDraftRestored(false);
+            }}
+            className="self-start rounded-sm border border-border px-3 py-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent sm:self-auto"
+          >
+            Clear saved details
+          </button>
+        </div>
+      ) : null}
 
       <form onSubmit={handleSubmit} noValidate className="grid gap-5">
         <div>
@@ -457,27 +509,27 @@ export function RegistrationForm() {
         </div>
 
         <CountryPhoneInput
-          id={`${formId}-phone`}
-          label="Phone Number"
-          required
-          countryCode={formValues.countryCode}
-          value={formValues.phone}
-          error={fieldErrors.phone}
-          onCountryChange={handleCountryChange}
-          onChange={(value) => updateField("phone", value)}
-          onBlur={() => handleBlur("phone")}
-        />
-
-        <CountryPhoneInput
           id={`${formId}-whatsapp`}
           label="WhatsApp Number"
-          optionalHint
+          required
           countryCode={formValues.countryCode}
-          value={formValues.whatsapp ?? ""}
+          value={formValues.whatsapp}
           error={fieldErrors.whatsapp}
           onCountryChange={handleCountryChange}
           onChange={(value) => updateField("whatsapp", value)}
           onBlur={() => handleBlur("whatsapp")}
+        />
+
+        <CountryPhoneInput
+          id={`${formId}-phone`}
+          label="Phone Number"
+          optionalHint
+          countryCode={formValues.countryCode}
+          value={formValues.phone ?? ""}
+          error={fieldErrors.phone}
+          onCountryChange={handleCountryChange}
+          onChange={(value) => updateField("phone", value)}
+          onBlur={() => handleBlur("phone")}
         />
 
         <CityCombobox

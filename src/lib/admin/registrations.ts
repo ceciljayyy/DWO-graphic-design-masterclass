@@ -36,6 +36,7 @@ function buildWhere(query: RegistrationListQuery): Prisma.RegistrationWhereInput
       { fullName: { contains: search } },
       { email: { contains: search } },
       { phone: { contains: search } },
+      { whatsapp: { contains: search } },
       { registrationReference: { contains: search } },
     ];
   }
@@ -144,6 +145,7 @@ export async function listRegistrations(query: RegistrationListQuery) {
         fullName: true,
         email: true,
         phone: true,
+        whatsapp: true,
         experienceLevel: true,
         paymentStatus: true,
         amount: true,

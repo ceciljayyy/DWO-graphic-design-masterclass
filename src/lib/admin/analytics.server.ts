@@ -11,12 +11,14 @@ import {
 } from "@/lib/admin/analytics";
 
 type BucketConfig = {
-  durationMs: number;
   stepMs: number;
   label: (date: Date) => string;
 };
 
 const ACCRA_TZ = "Africa/Accra";
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+const WEEK_MS = 7 * DAY_MS;
 
 function formatInAccra(
   date: Date,
@@ -28,82 +30,113 @@ function formatInAccra(
   }).format(date);
 }
 
-function getRangeConfig(range: AnalyticsRange): BucketConfig {
-  const hour = 60 * 60 * 1000;
-  const day = 24 * hour;
+function dayLabel(date: Date) {
+  return formatInAccra(date, { day: "numeric", month: "short" });
+}
 
+function getFixedRangeStart(
+  range: Exclude<AnalyticsRange, "all">,
+  end: Date,
+): { start: Date; config: BucketConfig } {
   switch (range) {
     case "6h":
       return {
-        durationMs: 6 * hour,
-        stepMs: hour,
-        label: (date) =>
-          formatInAccra(date, {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: false,
-          }),
+        start: new Date(end.getTime() - 6 * HOUR_MS),
+        config: {
+          stepMs: HOUR_MS,
+          label: (date) =>
+            formatInAccra(date, {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: false,
+            }),
+        },
       };
     case "12h":
       return {
-        durationMs: 12 * hour,
-        stepMs: hour,
-        label: (date) =>
-          formatInAccra(date, {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: false,
-          }),
+        start: new Date(end.getTime() - 12 * HOUR_MS),
+        config: {
+          stepMs: HOUR_MS,
+          label: (date) =>
+            formatInAccra(date, {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: false,
+            }),
+        },
       };
     case "24h":
       return {
-        durationMs: 24 * hour,
-        stepMs: hour,
-        label: (date) =>
-          formatInAccra(date, {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          }),
+        start: new Date(end.getTime() - 24 * HOUR_MS),
+        config: {
+          stepMs: HOUR_MS,
+          label: (date) =>
+            formatInAccra(date, {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            }),
+        },
       };
     case "48h":
       return {
-        durationMs: 48 * hour,
-        stepMs: 3 * hour,
-        label: (date) =>
-          formatInAccra(date, {
-            day: "numeric",
-            month: "short",
-            hour: "numeric",
-            hour12: true,
-          }),
+        start: new Date(end.getTime() - 48 * HOUR_MS),
+        config: {
+          stepMs: 3 * HOUR_MS,
+          label: (date) =>
+            formatInAccra(date, {
+              day: "numeric",
+              month: "short",
+              hour: "numeric",
+              hour12: true,
+            }),
+        },
       };
     case "7d":
       return {
-        durationMs: 7 * day,
-        stepMs: day,
-        label: (date) =>
-          formatInAccra(date, { day: "numeric", month: "short" }),
+        start: new Date(end.getTime() - 7 * DAY_MS),
+        config: { stepMs: DAY_MS, label: dayLabel },
       };
     case "14d":
       return {
-        durationMs: 14 * day,
-        stepMs: day,
-        label: (date) =>
-          formatInAccra(date, { day: "numeric", month: "short" }),
+        start: new Date(end.getTime() - 14 * DAY_MS),
+        config: { stepMs: DAY_MS, label: dayLabel },
       };
     case "30d":
       return {
-        durationMs: 30 * day,
-        stepMs: day,
-        label: (date) =>
-          formatInAccra(date, { day: "numeric", month: "short" }),
+        start: new Date(end.getTime() - 30 * DAY_MS),
+        config: { stepMs: DAY_MS, label: dayLabel },
       };
     default: {
       const exhaustive: never = range;
       return exhaustive;
     }
   }
+}
+
+function getAllTimeBucketConfig(start: Date, end: Date): BucketConfig {
+  const span = Math.max(end.getTime() - start.getTime(), DAY_MS);
+
+  if (span <= 2 * DAY_MS) {
+    return {
+      stepMs: HOUR_MS,
+      label: (date) =>
+        formatInAccra(date, {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }),
+    };
+  }
+
+  if (span <= 90 * DAY_MS) {
+    return { stepMs: DAY_MS, label: dayLabel };
+  }
+
+  return {
+    stepMs: WEEK_MS,
+    label: (date) => dayLabel(date),
+  };
 }
 
 function floorToStep(date: Date, stepMs: number) {
@@ -190,30 +223,42 @@ export async function getRegistrationAnalytics(
   rangeInput: AnalyticsRange = "14d",
 ): Promise<RegistrationAnalytics> {
   const range = parseAnalyticsRange(rangeInput);
-  const config = getRangeConfig(range);
   const end = new Date();
-  const start = new Date(end.getTime() - config.durationMs);
   const prisma = getPrismaClient();
 
-  // Include registrations created in-range OR paid in-range.
-  // Pending→paid later would otherwise vanish from short windows like 6h.
+  let start: Date;
+  let config: BucketConfig;
+
+  if (range === "all") {
+    // Placeholder until we know the earliest activity from the full dataset.
+    start = new Date(end.getTime() - DAY_MS);
+    config = getAllTimeBucketConfig(start, end);
+  } else {
+    const fixed = getFixedRangeStart(range, end);
+    start = fixed.start;
+    config = fixed.config;
+  }
+
   const rows = await prisma.registration.findMany({
-    where: {
-      OR: [
-        {
-          createdAt: {
-            gte: start,
-            lte: end,
+    where:
+      range === "all"
+        ? undefined
+        : {
+            OR: [
+              {
+                createdAt: {
+                  gte: start,
+                  lte: end,
+                },
+              },
+              {
+                paidAt: {
+                  gte: start,
+                  lte: end,
+                },
+              },
+            ],
           },
-        },
-        {
-          paidAt: {
-            gte: start,
-            lte: end,
-          },
-        },
-      ],
-    },
     select: {
       createdAt: true,
       paidAt: true,
@@ -222,6 +267,22 @@ export async function getRegistrationAnalytics(
     },
     orderBy: { createdAt: "asc" },
   });
+
+  if (range === "all") {
+    if (rows.length === 0) {
+      start = new Date(end.getTime() - DAY_MS);
+    } else {
+      let earliest = rows[0].createdAt.getTime();
+      for (const row of rows) {
+        earliest = Math.min(earliest, row.createdAt.getTime());
+        if (row.paidAt) {
+          earliest = Math.min(earliest, row.paidAt.getTime());
+        }
+      }
+      start = new Date(earliest);
+    }
+    config = getAllTimeBucketConfig(start, end);
+  }
 
   const series = buildEmptyBuckets(start, end, config);
 

@@ -23,8 +23,8 @@ model Registration {
   registrationReference   String          @unique @db.VarChar(32)
   fullName                String          @db.VarChar(191)
   email                   String          @unique @db.VarChar(255)
-  phone                   String          @db.VarChar(30)
-  whatsapp                String?         @db.VarChar(30)
+  phone                   String?         @db.VarChar(30)
+  whatsapp                String          @db.VarChar(30)
   location                String          @db.VarChar(191)
   experienceLevel         ExperienceLevel
   paymentStatus           PaymentStatus   @default(PENDING)

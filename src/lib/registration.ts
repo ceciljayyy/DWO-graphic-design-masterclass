@@ -17,8 +17,8 @@ export type NormalizedRegistrationInput = {
   fullName: string;
   email: string;
   countryCode: string;
-  phone: string;
-  whatsapp: string | null;
+  phone: string | null;
+  whatsapp: string;
   location: string;
   experienceLevel: ExperienceLevel;
 };
@@ -131,7 +131,7 @@ export function validateRegistrationInput(
   }
 
   const phoneResult = validatePhoneForCountry(phoneRaw, countryCode, {
-    required: true,
+    required: false,
     fieldLabel: "phone",
   });
   if (isInvalidPhone(phoneResult)) {
@@ -139,7 +139,7 @@ export function validateRegistrationInput(
   }
 
   const whatsappResult = validatePhoneForCountry(whatsappRaw, countryCode, {
-    required: false,
+    required: true,
     fieldLabel: "whatsapp",
   });
   if (isInvalidPhone(whatsappResult)) {
@@ -173,11 +173,9 @@ export function validateRegistrationInput(
       fullName: fullNameResult.success ? fullNameResult.value : "",
       email: emailResult.success ? emailResult.value : "",
       countryCode,
-      phone: phoneResult.ok ? phoneResult.e164 : "",
-      whatsapp:
-        whatsappResult.ok && whatsappResult.e164
-          ? whatsappResult.e164
-          : null,
+      phone:
+        phoneResult.ok && phoneResult.e164 ? phoneResult.e164 : null,
+      whatsapp: whatsappResult.ok ? whatsappResult.e164 : "",
       location,
       experienceLevel: experienceLevel as ExperienceLevel,
     },

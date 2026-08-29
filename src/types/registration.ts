@@ -10,8 +10,8 @@ export type RegistrationFormValues = {
   fullName: string;
   email: string;
   countryCode: string;
-  phone: string;
-  whatsapp?: string;
+  phone?: string;
+  whatsapp: string;
   location: string;
   experienceLevel: ExperienceLevel | "";
 };

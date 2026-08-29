@@ -6,6 +6,7 @@ export const ANALYTICS_RANGES = [
   { value: "7d", label: "1 week", shortLabel: "1W" },
   { value: "14d", label: "14 days", shortLabel: "14D" },
   { value: "30d", label: "1 month", shortLabel: "1M" },
+  { value: "all", label: "All time", shortLabel: "ALL" },
 ] as const;
 
 export type AnalyticsRange = (typeof ANALYTICS_RANGES)[number]["value"];

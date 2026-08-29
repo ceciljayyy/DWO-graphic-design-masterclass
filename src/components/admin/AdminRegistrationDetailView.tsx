@@ -53,8 +53,8 @@ export function AdminRegistrationDetailView({
           <div className="mt-4">
             <DetailRow label="Full Name" value={registration.fullName} />
             <DetailRow label="Email" value={registration.email} />
-            <DetailRow label="Phone" value={registration.phone} />
             <DetailRow label="WhatsApp" value={registration.whatsapp} />
+            <DetailRow label="Phone" value={registration.phone} />
             <DetailRow label="Location" value={registration.location} />
             <DetailRow
               label="Experience Level"
