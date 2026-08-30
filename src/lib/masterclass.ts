@@ -94,6 +94,7 @@ export const masterclass = {
   navigation: [
     { label: "About", href: "#about" },
     { label: "Skills", href: "#learn" },
+    { label: "Work", href: "#work" },
     { label: "Instructor", href: "#instructor" },
     { label: "FAQ", href: "#faq" },
   ] satisfies NavigationItem[],

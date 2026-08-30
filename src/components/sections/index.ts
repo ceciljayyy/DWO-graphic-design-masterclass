@@ -6,3 +6,4 @@ export { Hero } from "./Hero";
 export { Instructor } from "./Instructor";
 export { LearningOutcomes } from "./LearningOutcomes";
 export { MasterclassDetails } from "./MasterclassDetails";
+export { SelectedWork } from "./SelectedWork";

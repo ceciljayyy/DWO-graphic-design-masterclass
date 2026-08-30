@@ -10,6 +10,7 @@ import {
   Instructor,
   LearningOutcomes,
   MasterclassDetails,
+  SelectedWork,
 } from "@/components/sections";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { createHomeMetadata } from "@/lib/seo";
@@ -26,6 +27,7 @@ export default function Home() {
       <LearningOutcomes />
       <Audience />
       <Instructor />
+      <SelectedWork />
       <MasterclassDetails />
       <FAQ />
       <FinalCTA />
