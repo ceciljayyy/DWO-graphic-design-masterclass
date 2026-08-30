@@ -21,7 +21,9 @@ export function FAQ() {
               open={index === 0}
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-left text-base font-medium text-foreground focus:outline-none sm:text-lg xl:text-xl">
-                <span>{item.question}</span>
+                <h3 className="text-base font-medium sm:text-lg xl:text-xl">
+                  {item.question}
+                </h3>
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-border font-display text-lg text-muted transition-colors group-open:border-accent group-open:text-accent xl:h-10 xl:w-10 xl:text-xl">
                   +
                 </span>

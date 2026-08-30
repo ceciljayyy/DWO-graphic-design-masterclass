@@ -19,9 +19,9 @@ export function Audience() {
               key={item.title}
               className="border border-border bg-surface p-5 xl:p-6"
             >
-              <p className="font-display text-lg font-bold uppercase tracking-tightest text-foreground xl:text-xl 2xl:text-2xl">
+              <h3 className="font-display text-lg font-bold uppercase tracking-tightest text-foreground xl:text-xl 2xl:text-2xl">
                 {item.title}
-              </p>
+              </h3>
               <p className="mt-2 text-sm leading-7 text-muted sm:text-base xl:text-lg">
                 {item.description}
               </p>

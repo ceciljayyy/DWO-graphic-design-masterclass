@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { RegistrationCountdown } from "@/components/marketing/RegistrationCountdown";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { masterclass } from "@/lib/masterclass";
@@ -34,6 +35,8 @@ export function Hero() {
             <p className="mt-6 text-base leading-7 text-muted sm:text-lg xl:text-xl 2xl:text-2xl">
               {masterclass.hero.description}
             </p>
+
+            <RegistrationCountdown className="mt-8" />
 
             <div className="mt-8 space-y-5 border-y border-border py-6">
               <div className="grid gap-5 sm:grid-cols-2">
@@ -81,9 +84,9 @@ export function Hero() {
               className="absolute inset-0 bg-panel-glow"
             />
             <div className="relative">
-              <p className="font-display text-sm font-semibold uppercase tracking-[0.3em] text-accent xl:text-base">
+              <h2 className="font-display text-sm font-semibold uppercase tracking-[0.3em] text-accent xl:text-base">
                 Skills to learn
-              </p>
+              </h2>
               <ul className="mt-5 divide-y divide-border/80 xl:mt-6">
                 {masterclass.skills.map((skill, index) => (
                   <li
@@ -93,9 +96,9 @@ export function Hero() {
                     <p className="font-display text-xs font-semibold uppercase tracking-[0.28em] text-muted xl:text-sm">
                       0{index + 1}
                     </p>
-                    <p className="mt-1.5 font-display text-2xl font-extrabold uppercase leading-none tracking-tightest text-foreground sm:text-3xl xl:text-4xl 2xl:text-[2.75rem]">
+                    <h3 className="mt-1.5 font-display text-2xl font-extrabold uppercase leading-none tracking-tightest text-foreground sm:text-3xl xl:text-4xl 2xl:text-[2.75rem]">
                       {skill.title}
-                    </p>
+                    </h3>
                   </li>
                 ))}
               </ul>

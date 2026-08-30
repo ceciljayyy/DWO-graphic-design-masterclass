@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Outfit } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { masterclass } from "@/lib/masterclass";
+import { createSiteMetadata } from "@/lib/seo";
 
 import "./globals.css";
 
@@ -22,18 +22,14 @@ const barlowCondensed = Barlow_Condensed({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("http://localhost:3000"),
-  title: {
-    default: masterclass.name,
-    template: `%s | ${masterclass.name}`,
-  },
-  description: masterclass.description,
-  openGraph: {
-    title: masterclass.name,
-    description: masterclass.description,
-    type: "website",
-  },
+export const metadata: Metadata = createSiteMetadata();
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a0505" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f3eb" },
+  ],
+  colorScheme: "dark light",
 };
 
 export default function RootLayout({

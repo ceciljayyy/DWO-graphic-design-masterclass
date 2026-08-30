@@ -11,21 +11,15 @@ import {
   LearningOutcomes,
   MasterclassDetails,
 } from "@/components/sections";
-import { masterclass } from "@/lib/masterclass";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { createHomeMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: masterclass.name,
-  description: masterclass.description,
-  openGraph: {
-    title: masterclass.name,
-    description: masterclass.description,
-    type: "website",
-  },
-};
+export const metadata: Metadata = createHomeMetadata();
 
 export default function Home() {
   return (
     <main className="bg-background">
+      <StructuredData pathname="/" />
       <Header />
       <Hero />
       <AboutMasterclass />

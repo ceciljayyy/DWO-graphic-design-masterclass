@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 
 import { PaymentVerification } from "@/components/payment/PaymentVerification";
-import { masterclass } from "@/lib/masterclass";
+import { noIndexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: `Payment Verification | ${masterclass.name}`,
-  description: `Verify your payment for the ${masterclass.name}.`,
+  ...noIndexMetadata,
+  title: "Payment Verification",
+  description:
+    "Verify your payment for the Graphic Design & Media Class registration.",
 };
 
 type PaymentVerifyPageProps = {

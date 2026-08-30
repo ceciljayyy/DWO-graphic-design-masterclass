@@ -1,11 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { RegistrationCountdown } from "@/components/marketing/RegistrationCountdown";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { RegistrationForm } from "@/components/register/RegistrationForm";
 import { masterclass } from "@/lib/masterclass";
+import { createRegisterMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = createRegisterMetadata();
 
 export default function RegisterPage() {
   return (
@@ -51,6 +56,7 @@ export default function RegisterPage() {
               Enter your details to create a pending registration record, then
               continue to Paystack to pay the course fee securely.
             </p>
+            <RegistrationCountdown compact />
             <div className="grid gap-4 border border-border bg-surface p-5 xl:p-6">
               <div>
                 <p className="font-display text-xs font-semibold uppercase tracking-[0.26em] text-accent xl:text-sm">

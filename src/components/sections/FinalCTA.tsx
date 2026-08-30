@@ -1,5 +1,6 @@
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { RegistrationCountdown } from "@/components/marketing/RegistrationCountdown";
 import { masterclass } from "@/lib/masterclass";
 
 export function FinalCTA() {
@@ -13,6 +14,7 @@ export function FinalCTA() {
           />
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10 xl:gap-14">
             <div className="min-w-0 flex-1">
+              <RegistrationCountdown compact className="mb-6 lg:hidden" />
               <p className="font-display text-xs font-semibold uppercase tracking-[0.32em] text-accent sm:text-sm xl:text-base">
                 Registration starts {masterclass.registrationStarts.display}
               </p>

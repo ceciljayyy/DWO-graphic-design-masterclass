@@ -120,7 +120,8 @@ export const masterclass = {
     role: "Creative Director · Design With Otabil",
     bio: "James Baiden Otabil isn’t just a graphic designer — he’s a visual storyteller. With over six years of hands-on experience, he transforms ideas into designs that speak, sell, and stick. His work includes collaborations with brands and personalities from Raphiya to theBandFRA! and Dave Da Musicbox.",
     imageSrc: "/instructor/james-baiden-otabil.jpg",
-    imageAlt: "Portrait of James Baiden Otabil, Creative Director at Design With Otabil",
+    imageAlt:
+      "James Baiden Otabil, graphic design instructor and Creative Director at Design With Otabil in Ghana",
   },
   details: [
     {
