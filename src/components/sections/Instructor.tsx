@@ -12,7 +12,7 @@ export function Instructor() {
   return (
     <section id="instructor" className="border-t border-border bg-surface">
       <Container className="py-14 sm:py-16 lg:py-20">
-        <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-14">
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-10 xl:gap-12 2xl:gap-14">
           <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
             <svg width={0} height={0} className="absolute" aria-hidden>
               <defs>
@@ -59,15 +59,16 @@ export function Instructor() {
             <BrandLogo size="md" className="mb-8" />
 
             <SectionHeading
+              className="max-w-none xl:max-w-none"
               eyebrow={masterclass.instructor.sectionLabel}
               title={masterclass.instructor.name}
             />
 
-            <p className="mt-4 font-display text-sm font-semibold uppercase tracking-[0.26em] text-accent">
+            <p className="mt-4 font-display text-sm font-semibold uppercase tracking-[0.26em] text-accent xl:text-base">
               {masterclass.instructor.role}
             </p>
 
-            <p className="mt-6 max-w-xl text-sm leading-7 text-muted sm:text-base">
+            <p className="mt-6 text-sm leading-7 text-muted sm:text-base xl:text-lg 2xl:text-xl">
               {masterclass.instructor.bio}
             </p>
 
@@ -75,12 +76,12 @@ export function Instructor() {
               href={masterclass.contact.instagram.href}
               target="_blank"
               rel="noreferrer"
-              className="group mt-8 inline-flex max-w-full flex-col gap-2 border-t border-border pt-6 transition-colors"
+              className="group mt-8 inline-flex max-w-full flex-col gap-2 border-t border-border pt-6 transition-colors xl:mt-10"
             >
-              <span className="font-display text-[11px] font-semibold uppercase tracking-[0.32em] text-muted transition-colors group-hover:text-accent">
+              <span className="font-display text-xs font-semibold uppercase tracking-[0.32em] text-muted transition-colors group-hover:text-accent xl:text-sm">
                 {masterclass.contact.instagram.label}
               </span>
-              <span className="font-display text-2xl font-extrabold tracking-tightest text-foreground transition-colors group-hover:text-accent sm:text-3xl">
+              <span className="font-display text-2xl font-extrabold tracking-tightest text-foreground transition-colors group-hover:text-accent sm:text-3xl xl:text-4xl">
                 {masterclass.contact.instagram.handle}
               </span>
               <span

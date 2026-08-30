@@ -15,16 +15,16 @@ export function Footer() {
               {masterclass.name}
             </span>
           </div>
-          <p className="mt-4 max-w-md text-sm leading-7 text-muted">
+          <p className="mt-4 text-sm leading-7 text-muted sm:text-base xl:text-lg">
             {masterclass.footer.description}
           </p>
         </div>
 
         <div>
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.28em] text-accent xl:text-sm">
             Navigation
           </p>
-          <nav className="mt-4 flex flex-col gap-3 text-sm">
+          <nav className="mt-4 flex flex-col gap-3 text-sm xl:text-base">
             {masterclass.navigation.map((item) => (
               <a
                 key={item.label}
@@ -38,10 +38,10 @@ export function Footer() {
         </div>
 
         <div>
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.28em] text-accent xl:text-sm">
             Contact
           </p>
-          <div className="mt-4 grid gap-2 text-sm leading-7 text-muted">
+          <div className="mt-4 grid gap-2 text-sm leading-7 text-muted xl:text-base">
             {masterclass.contact.phoneNumbers.map((phone) => (
               <a
                 key={phone.href}

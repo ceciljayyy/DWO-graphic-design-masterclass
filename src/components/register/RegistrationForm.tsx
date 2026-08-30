@@ -412,15 +412,15 @@ export function RegistrationForm() {
   }
 
   return (
-    <section className="border border-border bg-surface p-6 sm:p-8">
+    <section className="border border-border bg-surface p-6 sm:p-8 xl:p-10">
       <div className="mb-8 border-b border-border pb-5">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+        <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent xl:text-sm">
           Registration
         </p>
-        <h2 className="mt-3 font-display text-3xl font-bold uppercase tracking-tightest text-foreground sm:text-4xl">
+        <h2 className="mt-3 font-display text-3xl font-bold uppercase tracking-tightest text-foreground sm:text-4xl xl:text-5xl">
           Complete your details
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted sm:text-base">
+        <p className="mt-3 text-sm leading-7 text-muted sm:text-base xl:text-lg">
           Submit the form to create your pending registration. Payment is not
           collected in this step. Your progress is saved on this device if you
           refresh or return later.
@@ -508,10 +508,29 @@ export function RegistrationForm() {
           />
         </div>
 
+        <div
+          id={`${formId}-whatsapp-note`}
+          role="note"
+          className="border border-accent/35 bg-background px-4 py-4"
+        >
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.22em] text-accent">
+            Important
+          </p>
+          <p className="mt-2 text-sm leading-7 text-foreground">
+            Enter the{" "}
+            <span className="font-medium text-accent">
+              correct WhatsApp number
+            </span>{" "}
+            you actively use on this device. This number will be used to add you
+            to the official course WhatsApp group after registration.
+          </p>
+        </div>
+
         <CountryPhoneInput
           id={`${formId}-whatsapp`}
           label="WhatsApp Number"
           required
+          descriptionId={`${formId}-whatsapp-note`}
           countryCode={formValues.countryCode}
           value={formValues.whatsapp}
           error={fieldErrors.whatsapp}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
@@ -47,10 +48,10 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
           )}
         >
           <div className="flex items-center justify-between px-5 py-5">
-            <div>
-              <p className="font-display text-sm font-bold tracking-[0.28em]">DWO</p>
-              <p className="mt-1 text-xs text-muted">Admin Console</p>
-            </div>
+            <Link href="/admin" className="inline-flex flex-col gap-2">
+              <BrandLogo size="sm" />
+              <p className="text-xs text-muted">Admin Console</p>
+            </Link>
             <button
               type="button"
               className="rounded-sm border border-border px-3 py-2 text-xs uppercase tracking-[0.16em] lg:hidden"
@@ -88,7 +89,7 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
 
         <div className="min-w-0">
           <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-4 backdrop-blur sm:px-6">
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 className="rounded-sm border border-border px-3 py-2 text-xs uppercase tracking-[0.16em] lg:hidden"
@@ -96,11 +97,21 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
               >
                 Menu
               </button>
-              <div>
-                <p className="font-display text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+              <Link
+                href="/admin"
+                className="shrink-0 lg:hidden"
+                aria-label="Admin dashboard home"
+              >
+                <BrandLogo size="sm" />
+              </Link>
+              <div className="min-w-0">
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.24em] text-accent lg:hidden">
                   Graphic Design & Media Class
                 </p>
-                <p className="mt-1 text-sm text-muted">
+                <p className="hidden font-display text-xs font-semibold uppercase tracking-[0.24em] text-accent lg:block">
+                  Admin Dashboard
+                </p>
+                <p className="mt-1 truncate text-sm text-muted">
                   {adminName} · {adminEmail}
                 </p>
               </div>

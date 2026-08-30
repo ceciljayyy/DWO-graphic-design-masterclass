@@ -26,6 +26,7 @@ type CountryPhoneInputProps = {
   countryCode: string;
   value: string;
   error?: string;
+  descriptionId?: string;
   placeholder?: string;
   onCountryChange: (countryCode: CountryCode) => void;
   onChange: (value: string) => void;
@@ -44,6 +45,7 @@ export function CountryPhoneInput({
   countryCode,
   value,
   error,
+  descriptionId,
   placeholder = "24 123 4567",
   onCountryChange,
   onChange,
@@ -53,6 +55,9 @@ export function CountryPhoneInput({
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;
+  const describedBy = [descriptionId, error ? errorId : undefined]
+    .filter(Boolean)
+    .join(" ");
   const listboxId = `${inputId}-countries`;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -246,7 +251,7 @@ export function CountryPhoneInput({
           autoComplete="tel-national"
           required={required}
           aria-invalid={Boolean(error)}
-          aria-describedby={error ? errorId : undefined}
+          aria-describedby={describedBy || undefined}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onBlur={onBlur}

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getCurrentAdmin } from "@/lib/auth/admin";
 import { masterclass } from "@/lib/masterclass";
@@ -17,8 +18,9 @@ export default async function AdminLoginPage() {
         <ThemeToggle />
       </div>
       <div className="w-full max-w-md border border-border bg-surface p-6 sm:p-8">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent">
-          DWO Admin
+        <BrandLogo size="md" priority />
+        <p className="mt-4 font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+          Admin Console
         </p>
         <h1 className="mt-3 font-display text-3xl font-bold uppercase tracking-tightest text-foreground">
           Sign in

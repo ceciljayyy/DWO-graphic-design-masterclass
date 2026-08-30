@@ -27,7 +27,7 @@ export function Header() {
           <div className="hidden items-center gap-6 lg:flex">
             <nav
               aria-label="Primary"
-              className="flex items-center gap-6 text-sm text-muted"
+              className="flex items-center gap-6 text-sm text-muted xl:text-base"
             >
               {masterclass.navigation.map((item) => (
                 <a
