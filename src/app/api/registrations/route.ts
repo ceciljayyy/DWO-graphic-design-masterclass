@@ -5,15 +5,10 @@ import {
   getDuplicateRegistrationMessage,
   isDuplicateEmailError,
 } from "@/lib/registration.server";
+import { maybeSendWelcomeEmail } from "@/lib/registration-communication.server";
 import { isDatabaseConnectionError } from "@/lib/prisma";
 import { validateRegistrationInput } from "@/lib/registration";
 import type { RegistrationApiError, RegistrationApiSuccess } from "@/types/registration";
-
-/**
- * Phase 3 note: lightweight in-memory rate limiting is intentionally not
- * added here. Prefer edge/CDN or host-level throttling for Hostinger
- * production hardening without introducing Redis for this phase.
- */
 
 export function GET() {
   return NextResponse.json<RegistrationApiError>(
@@ -50,6 +45,8 @@ export async function POST(request: Request) {
     }
 
     const registration = await createRegistrationRecord(validation.data);
+
+    void maybeSendWelcomeEmail(registration);
 
     return NextResponse.json<RegistrationApiSuccess>(
       {
@@ -89,7 +86,7 @@ export async function POST(request: Request) {
           error: {
             code: "DATABASE_UNAVAILABLE",
             message:
-              "The registration database is temporarily unavailable. Confirm MySQL/Docker is running, then try again.",
+              "The registration service is temporarily unavailable. Please try again shortly.",
           },
         },
         { status: 503 },

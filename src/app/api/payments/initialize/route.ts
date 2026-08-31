@@ -9,11 +9,6 @@ import type {
   PaymentInitializeSuccess,
 } from "@/types/payment";
 
-/**
- * Phase 4 note: lightweight rate limiting is intentionally omitted.
- * Prefer CDN / host-level throttling on Hostinger for production hardening.
- */
-
 export async function POST(request: Request) {
   try {
     const payload = (await request.json().catch(() => null)) as {

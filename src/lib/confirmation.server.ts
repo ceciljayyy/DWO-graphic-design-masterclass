@@ -1,10 +1,17 @@
 import type { Registration } from "@prisma/client";
 
+import {
+  buildBrandedEmailHtml,
+  buildBrandedEmailText,
+  escapeHtml,
+  getFirstName,
+} from "@/lib/email-templates.server";
 import { masterclass, registrationFee } from "@/lib/masterclass";
 import { isEmailConfigured, sendEmail } from "@/lib/email";
 import { getPrismaClient } from "@/lib/prisma";
 
 export type ConfirmationPayload = {
+  firstName: string;
   fullName: string;
   email: string;
   registrationReference: string;
@@ -32,6 +39,7 @@ export function buildConfirmationPayload(
   registration: Registration,
 ): ConfirmationPayload {
   return {
+    firstName: getFirstName(registration.fullName),
     fullName: registration.fullName,
     email: registration.email,
     registrationReference: registration.registrationReference,
@@ -46,83 +54,39 @@ export function buildConfirmationPayload(
 
 function buildConfirmationEmail(payload: ConfirmationPayload) {
   const paidLabel = formatPaidAt(payload.paidAt);
-  const contactLines = [
-    ...payload.phoneContacts,
-    payload.instagramHandle,
-  ].join("\n");
-
-  const subject = `Registration Confirmed — ${payload.courseName}`;
-
-  const text = [
-    `Hi ${payload.fullName},`,
-    "",
-    `Your payment for the ${payload.courseName} has been confirmed.`,
-    "",
-    `Registration Reference: ${payload.registrationReference}`,
-    `Course: ${payload.courseName}`,
-    `Course Period: ${payload.coursePeriod}`,
-    `Amount Paid: ${payload.amountDisplay}`,
-    `Payment Status: PAID`,
-    `Payment Date: ${paidLabel}`,
-    "",
+  const subject = `You're officially registered! — ${payload.courseName}`;
+  const greeting = `Hi ${payload.firstName},`;
+  const paragraphs = [
+    "You're officially registered! 🎉",
+    "Your payment has been confirmed and your place in the class is secured.",
     "Please keep your registration reference for your records.",
-    "",
-    "If you have any questions, contact us:",
-    contactLines,
-    "",
-    `— ${masterclass.brand} (${masterclass.brandFull})`,
-  ].join("\n");
+  ];
+  const detailRows = [
+    { label: "Registration Reference", value: payload.registrationReference },
+    { label: "Course", value: payload.courseName },
+    { label: "Course Period", value: payload.coursePeriod },
+    { label: "Amount Paid", value: payload.amountDisplay },
+    { label: "Payment Status", value: "Paid" },
+    { label: "Payment Date", value: paidLabel },
+  ];
 
-  const html = `
-    <div style="font-family: Arial, sans-serif; color: #1a1a1a; line-height: 1.6; max-width: 560px;">
-      <p>Hi ${escapeHtml(payload.fullName)},</p>
-      <p>Your payment for the <strong>${escapeHtml(payload.courseName)}</strong> has been confirmed.</p>
-      <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
-        <tr>
-          <td style="padding: 8px 0; color: #666;">Registration Reference</td>
-          <td style="padding: 8px 0; font-weight: bold;">${escapeHtml(payload.registrationReference)}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666;">Course</td>
-          <td style="padding: 8px 0;">${escapeHtml(payload.courseName)}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666;">Course Period</td>
-          <td style="padding: 8px 0;">${escapeHtml(payload.coursePeriod)}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666;">Amount Paid</td>
-          <td style="padding: 8px 0;">${escapeHtml(payload.amountDisplay)}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666;">Payment Status</td>
-          <td style="padding: 8px 0;">PAID</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666;">Payment Date</td>
-          <td style="padding: 8px 0;">${escapeHtml(paidLabel)}</td>
-        </tr>
-      </table>
-      <p>Please keep your registration reference for your records.</p>
-      <p style="color: #666;">
-        Questions? Contact us:<br/>
-        ${payload.phoneContacts.map(escapeHtml).join("<br/>")}<br/>
-        ${escapeHtml(payload.instagramHandle)}
-      </p>
-      <p>— ${escapeHtml(masterclass.brand)} (${escapeHtml(masterclass.brandFull)})</p>
-    </div>
-  `;
+  const text = buildBrandedEmailText({
+    greeting,
+    paragraphs,
+    detailRows,
+  });
+
+  const html = buildBrandedEmailHtml({
+    greeting,
+    paragraphs: [
+      "<strong>You're officially registered! 🎉</strong>",
+      "Your payment has been confirmed and your place in the class is secured.",
+      "Please keep your registration reference for your records.",
+    ],
+    detailRows,
+  });
 
   return { subject, text, html };
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
 }
 
 /**
@@ -223,7 +187,11 @@ export async function maybeSendRegistrationConfirmation(
   try {
     const result = await sendRegistrationConfirmationEmail(registration);
     return result.sent;
-  } catch {
+  } catch (error) {
+    console.error("[communication] confirmation email failed", {
+      registrationId: registration.id,
+      error,
+    });
     return false;
   }
 }

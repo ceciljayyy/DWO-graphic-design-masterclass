@@ -60,6 +60,19 @@ export function AdminRegistrationDetailView({
               label="Experience Level"
               value={formatExperienceLevel(registration.experienceLevel)}
             />
+            <DetailRow
+              label="Marketing Source"
+              value={registration.marketingSourceLabel}
+            />
+            {registration.utmSource ? (
+              <DetailRow label="UTM Source" value={registration.utmSource} />
+            ) : null}
+            {registration.utmMedium ? (
+              <DetailRow label="UTM Medium" value={registration.utmMedium} />
+            ) : null}
+            {registration.utmCampaign ? (
+              <DetailRow label="UTM Campaign" value={registration.utmCampaign} />
+            ) : null}
           </div>
         </section>
 
@@ -97,9 +110,25 @@ export function AdminRegistrationDetailView({
 
         <section className="border border-border bg-surface p-5">
           <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-accent">
-            Notification information
+            Communication
           </h2>
           <div className="mt-4">
+            <DetailRow
+              label="Welcome Email Sent"
+              value={
+                registration.welcomeEmailSentAt
+                  ? formatAdminDate(registration.welcomeEmailSentAt)
+                  : "Not sent"
+              }
+            />
+            <DetailRow
+              label="Payment Reminder Sent"
+              value={
+                registration.paymentReminderEmailSentAt
+                  ? formatAdminDate(registration.paymentReminderEmailSentAt)
+                  : "Not sent"
+              }
+            />
             <DetailRow
               label="Confirmation Email Sent"
               value={

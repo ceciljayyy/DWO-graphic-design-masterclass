@@ -99,6 +99,10 @@ async function createWithUniqueReference(
           paymentStatus: "PENDING",
           amount: new Prisma.Decimal(registrationConfiguration.fee.amount),
           paystackReference: null,
+          marketingSource: data.marketing.marketingSource,
+          utmSource: data.marketing.utmSource,
+          utmMedium: data.marketing.utmMedium,
+          utmCampaign: data.marketing.utmCampaign,
         },
       });
     } catch (error) {

@@ -18,6 +18,16 @@ enum PaymentStatus {
   FAILED
 }
 
+enum MarketingSource {
+  INSTAGRAM
+  TIKTOK
+  WHATSAPP
+  FACEBOOK
+  GOOGLE
+  DIRECT
+  OTHER
+}
+
 model Registration {
   id                      String          @id @default(cuid()) @db.VarChar(191)
   registrationReference   String          @unique @db.VarChar(32)
@@ -30,8 +40,15 @@ model Registration {
   paymentStatus           PaymentStatus   @default(PENDING)
   amount                  Decimal         @db.Decimal(10, 2)
   paystackReference       String?         @unique @db.VarChar(120)
+  paymentAuthorizationUrl String?         @db.VarChar(512)
   paidAt                  DateTime?
   confirmationEmailSentAt DateTime?
+  welcomeEmailSentAt        DateTime?
+  paymentReminderEmailSentAt DateTime?
+  marketingSource         MarketingSource?
+  utmSource               String?          @db.VarChar(120)
+  utmMedium               String?          @db.VarChar(120)
+  utmCampaign             String?          @db.VarChar(191)
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
 
@@ -39,6 +56,8 @@ model Registration {
   @@index([createdAt])
   @@index([phone])
   @@index([fullName])
+  @@index([marketingSource])
+  @@index([paymentStatus, paymentReminderEmailSentAt, createdAt])
 }
 
 model AdminUser {

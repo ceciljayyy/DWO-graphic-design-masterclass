@@ -40,3 +40,31 @@ export function formatAmountDisplay(amount: string | number, currency = "GHS") {
   }
   return `${currency} ${value.toFixed(2)}`;
 }
+
+export function formatMarketingSource(
+  source: string | null | undefined,
+  fallback = "Direct",
+) {
+  if (!source) {
+    return fallback;
+  }
+
+  switch (source) {
+    case "INSTAGRAM":
+      return "Instagram";
+    case "TIKTOK":
+      return "TikTok";
+    case "WHATSAPP":
+      return "WhatsApp";
+    case "FACEBOOK":
+      return "Facebook";
+    case "GOOGLE":
+      return "Google";
+    case "DIRECT":
+      return "Direct";
+    case "OTHER":
+      return "Other";
+    default:
+      return fallback;
+  }
+}

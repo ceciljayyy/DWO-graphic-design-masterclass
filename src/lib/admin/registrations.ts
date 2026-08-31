@@ -2,6 +2,7 @@ import { Prisma, type ExperienceLevel, type PaymentStatus } from "@prisma/client
 
 import { getPrismaClient } from "@/lib/prisma";
 import { registrationFee } from "@/lib/masterclass";
+import { formatMarketingSource as formatMarketingSourceLabel } from "@/lib/admin/format";
 
 export type RegistrationSort = "newest" | "oldest" | "amount_desc" | "amount_asc";
 
@@ -149,6 +150,7 @@ export async function listRegistrations(query: RegistrationListQuery) {
         experienceLevel: true,
         paymentStatus: true,
         amount: true,
+        marketingSource: true,
         createdAt: true,
       },
     }),
@@ -158,6 +160,7 @@ export async function listRegistrations(query: RegistrationListQuery) {
     items: items.map((item) => ({
       ...item,
       amount: item.amount.toString(),
+      marketingSourceLabel: formatMarketingSourceLabel(item.marketingSource),
       createdAt: item.createdAt.toISOString(),
     })),
     total,
@@ -192,6 +195,14 @@ export async function getRegistrationById(id: string) {
     paidAt: registration.paidAt?.toISOString() ?? null,
     confirmationEmailSentAt:
       registration.confirmationEmailSentAt?.toISOString() ?? null,
+    welcomeEmailSentAt: registration.welcomeEmailSentAt?.toISOString() ?? null,
+    paymentReminderEmailSentAt:
+      registration.paymentReminderEmailSentAt?.toISOString() ?? null,
+    marketingSource: registration.marketingSource,
+    marketingSourceLabel: formatMarketingSourceLabel(registration.marketingSource),
+    utmSource: registration.utmSource,
+    utmMedium: registration.utmMedium,
+    utmCampaign: registration.utmCampaign,
     createdAt: registration.createdAt.toISOString(),
     updatedAt: registration.updatedAt.toISOString(),
   };

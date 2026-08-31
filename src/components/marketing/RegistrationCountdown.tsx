@@ -31,6 +31,7 @@ function CountdownUnit({
       )}
     >
       <p
+        suppressHydrationWarning
         className={cn(
           "font-display font-extrabold tracking-tightest text-foreground",
           compact
@@ -52,13 +53,50 @@ function CountdownUnit({
   );
 }
 
+function CountdownSkeleton({
+  className,
+  compact,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
+  const labels = ["Days", "Hours", "Minutes", "Seconds"];
+
+  return (
+    <section
+      className={cn(
+        "border border-border bg-surface/80 shadow-subtle",
+        compact ? "p-4 sm:p-5" : "p-5 sm:p-6 xl:p-8",
+        className,
+      )}
+    >
+      <p
+        className={cn(
+          "font-display font-semibold uppercase tracking-[0.28em] text-accent",
+          compact ? "text-xs" : "text-xs sm:text-sm xl:text-base",
+        )}
+      >
+        Registration opens in
+      </p>
+      <div
+        className={cn(
+          "mt-4 grid grid-cols-4 gap-3",
+          compact ? "sm:gap-3" : "sm:mt-5 sm:gap-4",
+        )}
+      >
+        {labels.map((label) => (
+          <CountdownUnit key={label} value="--" label={label} compact={compact} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function RegistrationCountdown({
   className,
   compact = false,
 }: RegistrationCountdownProps) {
-  const [snapshot, setSnapshot] = useState<CountdownSnapshot>(() =>
-    getCountdownSnapshot(),
-  );
+  const [snapshot, setSnapshot] = useState<CountdownSnapshot | null>(null);
 
   useEffect(() => {
     function tick() {
@@ -67,8 +105,13 @@ export function RegistrationCountdown({
 
     tick();
     const interval = window.setInterval(tick, 1000);
+
     return () => window.clearInterval(interval);
   }, []);
+
+  if (snapshot === null) {
+    return <CountdownSkeleton className={className} compact={compact} />;
+  }
 
   if (!snapshot.isVisible) {
     return null;

@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const rateKey = `${ip}:${email.trim().toLowerCase()}`;
     const rate = assertLoginAllowed(rateKey);
 
-    if (!rate.allowed) {
+    if (rate.allowed === false) {
       return NextResponse.json(
         {
           success: false,

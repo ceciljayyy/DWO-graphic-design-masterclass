@@ -4,6 +4,7 @@ import {
   buildRegistrationWhereForExport,
   type RegistrationListQuery,
 } from "@/lib/admin/registrations";
+import { formatMarketingSource } from "@/lib/admin/format";
 import { getPrismaClient } from "@/lib/prisma";
 
 function sanitizeCsvCell(value: string) {
@@ -36,6 +37,13 @@ const HEADERS = [
   "WhatsApp",
   "Location",
   "Experience Level",
+  "Marketing Source",
+  "UTM Source",
+  "UTM Medium",
+  "UTM Campaign",
+  "Welcome Email Sent At",
+  "Payment Reminder Sent At",
+  "Confirmation Email Sent At",
   "Payment Status",
   "Amount",
   "Paystack Reference",
@@ -52,6 +60,13 @@ function toRow(registration: Registration) {
     cell(registration.whatsapp),
     cell(registration.location),
     cell(registration.experienceLevel),
+    cell(formatMarketingSource(registration.marketingSource)),
+    cell(registration.utmSource),
+    cell(registration.utmMedium),
+    cell(registration.utmCampaign),
+    cell(registration.welcomeEmailSentAt?.toISOString() ?? ""),
+    cell(registration.paymentReminderEmailSentAt?.toISOString() ?? ""),
+    cell(registration.confirmationEmailSentAt?.toISOString() ?? ""),
     cell(registration.paymentStatus),
     cell(registration.amount.toString()),
     cell(registration.paystackReference),

@@ -95,6 +95,7 @@ export const masterclass = {
     { label: "About", href: "#about" },
     { label: "Skills", href: "#learn" },
     { label: "Work", href: "#work" },
+    { label: "Results", href: "#success" },
     { label: "Instructor", href: "#instructor" },
     { label: "FAQ", href: "#faq" },
   ] satisfies NavigationItem[],

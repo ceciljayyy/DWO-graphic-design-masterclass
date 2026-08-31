@@ -1,9 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type TouchEvent } from "react";
 
+import Image from "next/image";
+
 import { PortfolioLightbox } from "@/components/portfolio/PortfolioLightbox";
+import { CrossfadeImage } from "@/components/ui/crossfade-image";
 import {
   getPortfolioDisplaySize,
   getPortfolioNeighbors,
@@ -33,8 +35,7 @@ function GalleryArtwork({
 }) {
   const distance = Math.abs(offset);
   const isEdge = distance === 2;
-  const role = isActive ? "hero" : distance === 1 ? "near" : "far";
-  const displaySize = getPortfolioDisplaySize(item, role);
+  const displaySize = getPortfolioDisplaySize(item, "hero");
 
   return (
     <button
@@ -43,7 +44,8 @@ function GalleryArtwork({
       aria-label={`View ${item.category}: ${item.alt}`}
       aria-current={isActive ? "true" : undefined}
       className={cn(
-        "group absolute left-1/2 top-1/2 origin-center transition-[transform,opacity,filter] duration-500 ease-out",
+        "group absolute left-1/2 top-1/2 origin-center will-change-transform",
+        "transition-[transform,opacity,filter] duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         isActive ? "z-30 cursor-default" : "z-10 cursor-pointer hover:z-20",
       )}
@@ -67,18 +69,18 @@ function GalleryArtwork({
         width={item.width}
         height={item.height}
         sizes="(min-width: 1024px) 30rem, 90vw"
-        draggable={false}
         priority={isActive}
-        className={cn(
-          "block select-none object-contain",
-          isActive
-            ? "drop-shadow-[0_28px_70px_rgba(0,0,0,0.45)] dark:drop-shadow-[0_28px_70px_rgba(0,0,0,0.55)]"
-            : "drop-shadow-[0_18px_40px_rgba(0,0,0,0.28)] dark:drop-shadow-[0_18px_40px_rgba(0,0,0,0.45)]",
-        )}
+        draggable={false}
         style={{
           height: displaySize.height,
           width: displaySize.width,
         }}
+        className={cn(
+          "block select-none object-contain",
+          isActive
+            ? "drop-shadow-[0_28px_70px_rgba(0,0,0,0.45)] dark:drop-shadow-[0_28px_70px_rgba(0,0,0,0.55)]"
+            : "drop-shadow-[0_18px_40px_rgba(0,0,0,0.28)] dark:drop-shadow-[0_28px_40px_rgba(0,0,0,0.45)]",
+        )}
       />
     </button>
   );
@@ -173,7 +175,7 @@ export function PortfolioGallery({ className }: PortfolioGalleryProps) {
           >
             {neighbors.map(({ itemIndex, offset }) => (
               <GalleryArtwork
-                key={`${portfolioItems[itemIndex].id}-${offset}`}
+                key={itemIndex}
                 item={portfolioItems[itemIndex]}
                 offset={offset}
                 isActive={offset === 0}
@@ -187,7 +189,7 @@ export function PortfolioGallery({ className }: PortfolioGalleryProps) {
           </div>
 
           <div className="relative z-40 mx-auto mt-2 max-w-xl text-center">
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.34em] text-accent">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.34em] text-accent transition-opacity duration-500">
               {activeItem.category}
             </p>
             <div className="mt-6 flex items-center justify-center gap-4">
@@ -232,20 +234,20 @@ export function PortfolioGallery({ className }: PortfolioGalleryProps) {
               aria-hidden
               className="pointer-events-none absolute inset-x-8 -bottom-6 h-24 rounded-[100%] bg-accent/10 blur-3xl"
             />
-            <Image
-              key={activeItem.id}
+            <CrossfadeImage
               src={activeItem.src}
               alt={activeItem.alt}
               width={activeItem.width}
               height={activeItem.height}
               sizes="(max-width: 768px) 92vw, 420px"
               priority
-              className="block select-none object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.28)] dark:drop-shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
+              durationMs={900}
               style={{
                 height: heroSize.height,
                 width: heroSize.width,
                 maxWidth: "100%",
               }}
+              imageClassName="block select-none object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.28)] dark:drop-shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
             />
           </div>
 

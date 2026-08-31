@@ -16,6 +16,13 @@ export type RegistrationFormValues = {
   experienceLevel: ExperienceLevel | "";
 };
 
+export type RegistrationAttributionValues = {
+  marketingSource?: string;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+};
+
 export type RegistrationValidationErrors = Partial<
   Record<keyof RegistrationFormValues | "form", string>
 >;

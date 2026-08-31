@@ -3,6 +3,7 @@ import { Barlow_Condensed, Outfit } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { AttributionCapture } from "@/components/marketing/AttributionCapture";
 import { createSiteMetadata } from "@/lib/seo";
 
 import "./globals.css";
@@ -48,7 +49,10 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="bg-background font-sans text-foreground antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AttributionCapture />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -7,3 +7,4 @@ export { Instructor } from "./Instructor";
 export { LearningOutcomes } from "./LearningOutcomes";
 export { MasterclassDetails } from "./MasterclassDetails";
 export { SelectedWork } from "./SelectedWork";
+export { StudentSuccess } from "./StudentSuccess";

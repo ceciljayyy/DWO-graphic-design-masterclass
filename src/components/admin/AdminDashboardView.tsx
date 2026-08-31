@@ -1,9 +1,11 @@
 import Link from "next/link";
 
+import { MarketingSourceBreakdown } from "@/components/admin/MarketingSourceBreakdown";
 import { PaymentStatusBadge } from "@/components/admin/PaymentStatusBadge";
 import { RegistrationAnalytics } from "@/components/admin/RegistrationAnalytics";
 import { formatAdminDate, formatAmountDisplay } from "@/lib/admin/format";
 import type { RegistrationAnalytics as RegistrationAnalyticsData } from "@/lib/admin/analytics";
+import type { MarketingSourceStat } from "@/lib/admin/marketing-analytics.server";
 import { masterclass } from "@/lib/masterclass";
 import { cn } from "@/lib/utils";
 
@@ -14,9 +16,11 @@ type DashboardData = Awaited<
 export function AdminDashboardView({
   data,
   analytics,
+  marketingSources,
 }: {
   data: DashboardData;
   analytics: RegistrationAnalyticsData;
+  marketingSources: MarketingSourceStat[];
 }) {
   return (
     <div className="space-y-8">
@@ -118,6 +122,8 @@ export function AdminDashboardView({
           </div>
         </section>
       </div>
+
+      <MarketingSourceBreakdown stats={marketingSources} />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <section className="border border-border bg-surface p-5">

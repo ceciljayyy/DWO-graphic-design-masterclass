@@ -95,6 +95,16 @@ function isFailedPaystackStatus(status: string) {
   return status.toLowerCase() === "failed";
 }
 
+function isAbandonedPaystackStatus(status: string) {
+  return status.toLowerCase() === "abandoned";
+}
+
+function canRotatePaystackReference(status: string) {
+  return (
+    isFailedPaystackStatus(status) || isAbandonedPaystackStatus(status)
+  );
+}
+
 async function findRegistrationByReference(registrationReference: string) {
   return getPrismaClient().registration.findUnique({
     where: { registrationReference },
@@ -105,6 +115,83 @@ async function findRegistrationByPaystackReference(paystackReference: string) {
   return getPrismaClient().registration.findUnique({
     where: { paystackReference },
   });
+}
+
+type ExistingPaymentResolution =
+  | { action: "create_new" }
+  | {
+      action: "reuse";
+      paystackReference: string;
+      authorizationUrl: string;
+    };
+
+async function resolveExistingPaymentAttempt(
+  registration: Registration,
+): Promise<ExistingPaymentResolution> {
+  const existingReference = registration.paystackReference?.trim();
+
+  if (!existingReference || registration.paymentStatus === "PAID") {
+    return { action: "create_new" };
+  }
+
+  try {
+    const transaction = await verifyPaystackTransaction(existingReference);
+
+    if (isSuccessfulPaystackStatus(transaction.status)) {
+      await applyVerifiedPaystackTransaction(transaction);
+      throw new PaymentFlowError(
+        "This registration has already been paid for.",
+        "ALREADY_PAID",
+        409,
+      );
+    }
+
+    if (!canRotatePaystackReference(transaction.status)) {
+      const storedUrl = registration.paymentAuthorizationUrl?.trim();
+
+      if (storedUrl) {
+        return {
+          action: "reuse",
+          paystackReference: existingReference,
+          authorizationUrl: storedUrl,
+        };
+      }
+
+      throw new PaymentFlowError(
+        "A payment is already in progress for this registration. Please complete it or try again shortly.",
+        "PAYMENT_IN_PROGRESS",
+        409,
+      );
+    }
+
+    return { action: "create_new" };
+  } catch (error) {
+    if (error instanceof PaymentFlowError) {
+      throw error;
+    }
+
+    if (
+      error instanceof PaystackError &&
+      /not found/i.test(error.message)
+    ) {
+      return { action: "create_new" };
+    }
+
+    throw error;
+  }
+}
+
+function buildInitializeResponse(
+  registration: Registration,
+  authorizationUrl: string,
+  paystackReference: string,
+) {
+  return {
+    authorizationUrl,
+    paystackReference,
+    registrationReference: registration.registrationReference,
+    amountDisplay: registrationFee.display,
+  };
 }
 
 export async function initializePaymentForRegistration(
@@ -137,6 +224,16 @@ export async function initializePaymentForRegistration(
     );
   }
 
+  const existingPayment = await resolveExistingPaymentAttempt(registration);
+
+  if (existingPayment.action === "reuse") {
+    return buildInitializeResponse(
+      registration,
+      existingPayment.authorizationUrl,
+      existingPayment.paystackReference,
+    );
+  }
+
   const amountInMinorUnits = assertAmountConsistency(registration);
   const prisma = getPrismaClient();
 
@@ -149,6 +246,7 @@ export async function initializePaymentForRegistration(
         data: {
           paystackReference,
           paymentStatus: "PENDING",
+          paymentAuthorizationUrl: null,
         },
       });
 
@@ -162,12 +260,18 @@ export async function initializePaymentForRegistration(
         },
       });
 
-      return {
-        authorizationUrl: initialization.authorizationUrl,
-        paystackReference: initialization.reference,
-        registrationReference: registration.registrationReference,
-        amountDisplay: registrationFee.display,
-      };
+      await prisma.registration.update({
+        where: { id: registration.id },
+        data: {
+          paymentAuthorizationUrl: initialization.authorizationUrl,
+        },
+      });
+
+      return buildInitializeResponse(
+        registration,
+        initialization.authorizationUrl,
+        initialization.reference,
+      );
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -259,13 +363,46 @@ export async function applyVerifiedPaystackTransaction(
       ? new Date(transaction.paidAt)
       : new Date();
 
-    const updated = await getPrismaClient().registration.update({
-      where: { id: registration.id },
+    const claim = await getPrismaClient().registration.updateMany({
+      where: {
+        id: registration.id,
+        paymentStatus: { in: ["PENDING", "FAILED"] },
+      },
       data: {
         paymentStatus: "PAID",
         paidAt,
         paystackReference: transaction.reference,
+        paymentAuthorizationUrl: null,
       },
+    });
+
+    if (claim.count === 0) {
+      const current = await getPrismaClient().registration.findUnique({
+        where: { id: registration.id },
+      });
+
+      if (!current) {
+        throw new PaymentFlowError(
+          "Registration not found for this payment reference.",
+          "REGISTRATION_NOT_FOUND",
+          404,
+        );
+      }
+
+      const confirmationEmailSent =
+        await maybeSendRegistrationConfirmation(current);
+
+      return {
+        outcome: "already_paid" as const,
+        summary: toPaymentSummary(
+          current,
+          confirmationEmailSent || Boolean(current.confirmationEmailSentAt),
+        ),
+      };
+    }
+
+    const updated = await getPrismaClient().registration.findUniqueOrThrow({
+      where: { id: registration.id },
     });
 
     const confirmationEmailSent = await maybeSendRegistrationConfirmation(updated);
@@ -377,8 +514,8 @@ export function toSafePaymentError(error: unknown) {
 
     const message =
       /invalid key/i.test(error.message)
-        ? "Paystack rejected the API key. Copy the full Test Secret Key from Paystack (use the copy icon — do not type from a screenshot), paste it into .env.local, then restart the dev server."
-        : error.message;
+        ? "Payment service configuration is invalid. Please contact support."
+        : "We could not reach the payment service right now. Please try again.";
 
     return {
       code: error.code,

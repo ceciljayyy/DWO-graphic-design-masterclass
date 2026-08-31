@@ -5,6 +5,7 @@ import {
   formatAdminDate,
   formatAmountDisplay,
   formatExperienceLevel,
+  formatMarketingSource,
 } from "@/lib/admin/format";
 import type { RegistrationListQuery } from "@/lib/admin/registrations";
 
@@ -148,6 +149,7 @@ export function AdminRegistrationsView({
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">WhatsApp</th>
                   <th className="px-4 py-3 font-medium">Level</th>
+                  <th className="px-4 py-3 font-medium">Source</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Amount</th>
                   <th className="px-4 py-3 font-medium">Registered</th>
@@ -169,6 +171,9 @@ export function AdminRegistrationsView({
                     <td className="px-4 py-3">{item.whatsapp || item.phone || "—"}</td>
                     <td className="px-4 py-3">
                       {formatExperienceLevel(item.experienceLevel)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {formatMarketingSource(item.marketingSource)}
                     </td>
                     <td className="px-4 py-3">
                       <PaymentStatusBadge status={item.paymentStatus} />
@@ -200,6 +205,9 @@ export function AdminRegistrationsView({
                 <p className="mt-3 text-sm text-muted">{item.email}</p>
                 <p className="mt-1 text-sm text-muted">
                   {item.whatsapp || item.phone || "—"}
+                </p>
+                <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted">
+                  {formatMarketingSource(item.marketingSource)}
                 </p>
                 <div className="mt-3 flex items-center justify-between text-sm">
                   <span>{formatAmountDisplay(item.amount)}</span>

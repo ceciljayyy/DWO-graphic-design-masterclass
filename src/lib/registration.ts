@@ -1,6 +1,10 @@
 import { isCityInCountry } from "@/lib/locations";
 import { masterclass, registrationFee } from "@/lib/masterclass";
 import {
+  normalizeMarketingAttributionInput,
+  type MarketingAttributionPayload,
+} from "@/lib/marketing-attribution";
+import {
   getDefaultPhoneCountry,
   isInvalidPhone,
   isSupportedCountryCode,
@@ -21,6 +25,7 @@ export type NormalizedRegistrationInput = {
   whatsapp: string;
   location: string;
   experienceLevel: ExperienceLevel;
+  marketing: MarketingAttributionPayload;
 };
 
 export type RegistrationValidationResult =
@@ -94,7 +99,12 @@ export function validateRegistrationInput(
     return { success: false, errors: { form: "Invalid request payload." } };
   }
 
-  const raw = input as Partial<Record<keyof RegistrationFormValues, unknown>>;
+  const raw = input as Partial<
+    Record<
+      keyof RegistrationFormValues | keyof import("@/types/registration").RegistrationAttributionValues,
+      unknown
+    >
+  >;
   const errors: RegistrationValidationErrors = {};
 
   const fullNameResult = validateFullName(
@@ -167,6 +177,13 @@ export function validateRegistrationInput(
     return { success: false, errors };
   }
 
+  const marketing = normalizeMarketingAttributionInput({
+    marketingSource: raw.marketingSource,
+    utmSource: raw.utmSource,
+    utmMedium: raw.utmMedium,
+    utmCampaign: raw.utmCampaign,
+  });
+
   return {
     success: true,
     data: {
@@ -178,6 +195,7 @@ export function validateRegistrationInput(
       whatsapp: whatsappResult.ok ? whatsappResult.e164 : "",
       location,
       experienceLevel: experienceLevel as ExperienceLevel,
+      marketing,
     },
   };
 }

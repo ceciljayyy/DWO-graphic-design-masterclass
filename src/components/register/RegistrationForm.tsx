@@ -24,6 +24,7 @@ import {
   loadRegistrationDraft,
   saveRegistrationDraft,
 } from "@/lib/registration-draft";
+import { getStoredMarketingAttribution } from "@/lib/marketing-attribution.client";
 import type {
   RegistrationApiError,
   RegistrationCreateResponseData,
@@ -364,6 +365,8 @@ export function RegistrationForm() {
     setFormError(null);
 
     try {
+      const attribution = getStoredMarketingAttribution();
+
       const response = await fetch("/api/registrations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -375,6 +378,10 @@ export function RegistrationForm() {
           whatsapp: validation.data.whatsapp,
           location: validation.data.location,
           experienceLevel: validation.data.experienceLevel,
+          marketingSource: attribution?.marketingSource,
+          utmSource: attribution?.utmSource,
+          utmMedium: attribution?.utmMedium,
+          utmCampaign: attribution?.utmCampaign,
         }),
       });
 
