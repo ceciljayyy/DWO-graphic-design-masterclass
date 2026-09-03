@@ -1,17 +1,30 @@
 import { cn } from "@/lib/utils";
 
 type PaymentStatusBadgeProps = {
-  status: "PAID" | "PENDING" | "FAILED" | string;
+  status: string;
   className?: string;
 };
+
+function statusLabel(status: string) {
+  switch (status) {
+    case "PAYMENT_SUBMITTED":
+      return "Submitted";
+    case "PAYMENT_REJECTED":
+      return "Rejected";
+    default:
+      return status;
+  }
+}
 
 export function PaymentStatusBadge({ status, className }: PaymentStatusBadgeProps) {
   const styles =
     status === "PAID"
       ? "border-accent/40 text-accent"
-      : status === "FAILED"
+      : status === "FAILED" || status === "PAYMENT_REJECTED"
         ? "border-red/50 text-red"
-        : "border-border text-muted";
+        : status === "PAYMENT_SUBMITTED"
+          ? "border-accent/30 text-foreground"
+          : "border-border text-muted";
 
   return (
     <span
@@ -21,7 +34,7 @@ export function PaymentStatusBadge({ status, className }: PaymentStatusBadgeProp
         className,
       )}
     >
-      {status}
+      {statusLabel(status)}
     </span>
   );
 }

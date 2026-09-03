@@ -8,6 +8,8 @@ import {
 import { maybeSendWelcomeEmail } from "@/lib/registration-communication.server";
 import { isDatabaseConnectionError } from "@/lib/prisma";
 import { validateRegistrationInput } from "@/lib/registration";
+import { isCityInCountry } from "@/lib/locations";
+import { getPaymentMode } from "@/lib/payment-mode";
 import type { RegistrationApiError, RegistrationApiSuccess } from "@/types/registration";
 
 export function GET() {
@@ -44,6 +46,24 @@ export async function POST(request: Request) {
       );
     }
 
+    if (
+      !isCityInCountry(validation.data.location, validation.data.countryCode)
+    ) {
+      return NextResponse.json<RegistrationApiError>(
+        {
+          success: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Please correct the highlighted fields.",
+            fieldErrors: {
+              location: "Please select your city or town.",
+            },
+          },
+        },
+        { status: 400 },
+      );
+    }
+
     const registration = await createRegistrationRecord(validation.data);
 
     void maybeSendWelcomeEmail(registration);
@@ -54,8 +74,10 @@ export async function POST(request: Request) {
         data: {
           registrationId: registration.id,
           registrationReference: registration.registrationReference,
+          paymentAccessToken: registration.paymentAccessToken,
           paymentStatus: registration.paymentStatus,
           amount: registration.amount.toString(),
+          paymentMode: getPaymentMode(),
         },
       },
       { status: 201 },

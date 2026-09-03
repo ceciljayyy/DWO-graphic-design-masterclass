@@ -12,6 +12,7 @@
   --accent: #f4b942;
   --accent-foreground: #0a0505;
   --red: #a10f16;
+  --red-strong: #ef5350;
   --shadow-subtle: 0 18px 60px rgba(0, 0, 0, 0.32);
   --body-glow: rgba(161, 15, 22, 0.22);
   --hero-overlay: radial-gradient(
@@ -34,6 +35,7 @@
   --accent: #c9921a;
   --accent-foreground: #1a1210;
   --red: #a10f16;
+  --red-strong: #ef5350;
   --shadow-subtle: 0 14px 40px rgba(26, 18, 16, 0.08);
   --body-glow: rgba(161, 15, 22, 0.08);
   --hero-overlay: radial-gradient(

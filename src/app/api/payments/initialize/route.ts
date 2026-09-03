@@ -4,12 +4,27 @@ import {
   initializePaymentForRegistration,
   toSafePaymentError,
 } from "@/lib/payment.server";
+import { isManualPaymentMode } from "@/lib/payment-mode";
 import type {
   PaymentApiError,
   PaymentInitializeSuccess,
 } from "@/types/payment";
 
 export async function POST(request: Request) {
+  if (isManualPaymentMode()) {
+    return NextResponse.json<PaymentApiError>(
+      {
+        success: false,
+        error: {
+          code: "MANUAL_MODE_ACTIVE",
+          message:
+            "Online card checkout is temporarily unavailable. Please use Mobile Money payment instructions from your registration.",
+        },
+      },
+      { status: 400 },
+    );
+  }
+
   try {
     const payload = (await request.json().catch(() => null)) as {
       registrationReference?: unknown;

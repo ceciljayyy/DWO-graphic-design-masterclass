@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/payments", label: "Payment Approvals" },
+  { href: "/admin/whatsapp-contacts", label: "WhatsApp Contacts" },
   { href: "/admin/registrations", label: "Registrations" },
   { href: "/admin/settings", label: "Settings" },
 ];

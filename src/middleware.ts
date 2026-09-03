@@ -78,6 +78,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname === "/api/payments/manual/submit" && method === "POST") {
+    const limited = enforcePublicRateLimit(request, "paymentManualSubmit");
+    if (limited) {
+      return limited;
+    }
+  }
+
   if (
     pathname === "/api/payments/verify" &&
     (method === "POST" || method === "GET")
@@ -128,6 +135,7 @@ export const config = {
   matcher: [
     "/api/registrations",
     "/api/payments/initialize",
+    "/api/payments/manual/submit",
     "/api/payments/verify",
     "/admin/:path*",
     "/api/admin/:path*",

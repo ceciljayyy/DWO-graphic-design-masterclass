@@ -83,8 +83,10 @@ export function AdminRegistrationsView({
           className="min-h-11 rounded-sm border border-border bg-background px-3 text-sm outline-none focus:border-accent"
         >
           <option value="ALL">All statuses</option>
-          <option value="PAID">Paid</option>
           <option value="PENDING">Pending</option>
+          <option value="PAYMENT_SUBMITTED">Payment Submitted</option>
+          <option value="PAID">Paid</option>
+          <option value="PAYMENT_REJECTED">Rejected</option>
           <option value="FAILED">Failed</option>
         </select>
         <select

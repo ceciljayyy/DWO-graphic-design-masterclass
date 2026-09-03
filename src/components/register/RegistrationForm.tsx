@@ -2,10 +2,12 @@
 
 import type { FormEvent } from "react";
 import { useEffect, useId, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { CountryCode } from "libphonenumber-js";
 
 import { CityCombobox, CountryPhoneInput } from "@/components/forms";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import { masterclass } from "@/lib/masterclass";
 import {
   getDefaultPhoneCountry,
@@ -59,27 +61,13 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
-function CopyButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-
-  return (
-    <button
-      type="button"
-      onClick={async () => {
-        await navigator.clipboard.writeText(value);
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1500);
-      }}
-      className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent"
-    >
-      {copied ? "Copied" : "Copy"}
-    </button>
-  );
-}
-
 function formatPaymentStatus(status: string) {
   if (status === "PENDING") {
     return "Pending";
+  }
+
+  if (status === "PAYMENT_SUBMITTED") {
+    return "Awaiting verification";
   }
 
   if (status === "PAID") {
@@ -90,6 +78,10 @@ function formatPaymentStatus(status: string) {
     return "Failed";
   }
 
+  if (status === "PAYMENT_REJECTED") {
+    return "Rejected";
+  }
+
   return status;
 }
 
@@ -98,11 +90,20 @@ function RegistrationSuccess({
 }: {
   successData: RegistrationCreateResponseData;
 }) {
+  const router = useRouter();
   const [isPreparingPayment, setIsPreparingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const isManual = successData.paymentMode !== "PAYSTACK";
 
   async function handleContinueToPayment() {
     if (isPreparingPayment) {
+      return;
+    }
+
+    if (isManual) {
+      router.push(
+        `/payment?token=${encodeURIComponent(successData.paymentAccessToken)}`,
+      );
       return;
     }
 
@@ -150,37 +151,48 @@ function RegistrationSuccess({
       className="border border-border bg-surface p-6 sm:p-8"
     >
       <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent">
-        Registration created
+        Registration successful
       </p>
       <h2 className="mt-4 font-display text-2xl font-bold uppercase tracking-tightest text-foreground sm:text-3xl">
-        Your place is reserved pending payment
+        You&apos;re officially registered for the {masterclass.name}
       </h2>
       <p className="mt-3 text-sm leading-7 text-muted sm:text-base">
-        Your details for the {masterclass.name} have been saved. Continue to
-        Paystack to complete your {registrationConfiguration.fee.display}{" "}
-        registration fee.
+        {isManual
+          ? `Your details have been saved. Continue to payment instructions to send your ${registrationConfiguration.fee.display} Mobile Money payment.`
+          : `Your details have been saved. Continue to Paystack to complete your ${registrationConfiguration.fee.display} registration fee.`}
       </p>
 
       <div className="mt-6 grid gap-4 border-t border-border pt-6">
         <div className="border border-border bg-background p-4">
           <p className="font-display text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-            Course
-          </p>
-          <p className="mt-2 font-display text-lg font-bold uppercase tracking-tightest text-foreground">
-            {masterclass.name}
-          </p>
-        </div>
-
-        <div className="border border-border bg-background p-4">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-            Registration Reference
+            Your registration reference
           </p>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p className="font-display text-xl font-extrabold tracking-editorial text-foreground">
+            <p className="select-all font-display text-2xl font-extrabold tracking-editorial text-foreground sm:text-3xl">
               {successData.registrationReference}
             </p>
-            <CopyButton value={successData.registrationReference} />
+            <CopyButton
+              value={successData.registrationReference}
+              label="Copy reference"
+              copiedLabel="Copied"
+              ariaLabel={`Copy registration reference ${successData.registrationReference}`}
+            />
           </div>
+          <p className="mt-4 text-sm leading-7 text-muted">
+            <strong className="text-foreground">
+              Keep this reference safe. You will need it to verify your payment.
+            </strong>
+          </p>
+          {isManual ? (
+            <p className="mt-2 text-sm leading-7 text-muted">
+              <strong className="text-foreground">
+                IMPORTANT: Use this exact registration reference when making
+                your Mobile Money payment
+              </strong>{" "}
+              where a reference, description, or payment-note field is
+              available.
+            </p>
+          ) : null}
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -215,7 +227,9 @@ function RegistrationSuccess({
             disabled={isPreparingPayment}
             className="min-h-12 sm:w-auto"
           >
-            {isPreparingPayment ? "PREPARING PAYMENT..." : "CONTINUE TO PAYMENT"}
+            {isPreparingPayment
+              ? "Preparing payment..."
+              : "Continue to payment →"}
           </Button>
           <ButtonLink href="/" variant="secondary" className="min-h-12">
             Back to Home
@@ -223,8 +237,9 @@ function RegistrationSuccess({
         </div>
 
         <p className="text-sm leading-7 text-muted">
-          You will be redirected to Paystack to complete payment securely. Your
-          registration stays pending until payment is verified.
+          {isManual
+            ? "You will receive Mobile Money payment instructions next. Your registration stays pending until payment is verified by DWO."
+            : "You will be redirected to Paystack to complete payment securely. Your registration stays pending until payment is verified."}
         </p>
       </div>
     </section>
@@ -528,8 +543,9 @@ export function RegistrationForm() {
             <span className="font-medium text-accent">
               correct WhatsApp number
             </span>{" "}
-            you actively use on this device. This number will be used to add you
-            to the official course WhatsApp group after registration.
+            you actively use. After your payment is verified, DWO will send your
+            official confirmation message to this WhatsApp number. It is also
+            used to add you to the course WhatsApp group.
           </p>
         </div>
 

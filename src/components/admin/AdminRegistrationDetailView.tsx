@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { AdminManualPaymentReview } from "@/components/admin/AdminManualPaymentReview";
+import { AdminWhatsAppConfirmation } from "@/components/admin/AdminWhatsAppConfirmation";
 import { PaymentStatusBadge } from "@/components/admin/PaymentStatusBadge";
 import {
   formatAdminDate,
@@ -107,6 +109,29 @@ export function AdminRegistrationDetailView({
             <DetailRow label="Paid At" value={formatAdminDate(registration.paidAt)} />
           </div>
         </section>
+
+        {registration.paymentStatus === "PAID" ? (
+          <div className="lg:col-span-2">
+            <AdminWhatsAppConfirmation
+              fullName={registration.fullName}
+              whatsapp={registration.whatsapp}
+              registrationReference={registration.registrationReference}
+              amountDisplay={registration.amountDisplay}
+            />
+          </div>
+        ) : null}
+
+        {registration.activeManualPayment ? (
+          <div className="lg:col-span-2">
+            <AdminManualPaymentReview
+              registrationId={registration.id}
+              registrationReference={registration.registrationReference}
+              participantName={registration.fullName}
+              paymentStatus={registration.paymentStatus}
+              submission={registration.activeManualPayment}
+            />
+          </div>
+        ) : null}
 
         <section className="border border-border bg-surface p-5">
           <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-accent">

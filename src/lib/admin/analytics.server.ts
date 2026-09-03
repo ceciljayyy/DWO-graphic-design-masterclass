@@ -316,15 +316,27 @@ export async function getRegistrationAnalytics(
         if (row.paymentStatus === "PENDING") {
           point.pending += 1;
           pending += 1;
-        } else if (row.paymentStatus === "FAILED") {
+        } else if (
+          row.paymentStatus === "FAILED" ||
+          row.paymentStatus === "PAYMENT_REJECTED"
+        ) {
           point.failed += 1;
           failed += 1;
         } else if (row.paymentStatus === "PAID") {
           paidAmongCreated += 1;
+        } else if (row.paymentStatus === "PAYMENT_SUBMITTED") {
+          point.pending += 1;
+          pending += 1;
         }
-      } else if (row.paymentStatus === "PENDING") {
+      } else if (
+        row.paymentStatus === "PENDING" ||
+        row.paymentStatus === "PAYMENT_SUBMITTED"
+      ) {
         pending += 1;
-      } else if (row.paymentStatus === "FAILED") {
+      } else if (
+        row.paymentStatus === "FAILED" ||
+        row.paymentStatus === "PAYMENT_REJECTED"
+      ) {
         failed += 1;
       } else if (row.paymentStatus === "PAID") {
         paidAmongCreated += 1;

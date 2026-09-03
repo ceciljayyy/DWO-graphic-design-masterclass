@@ -68,6 +68,10 @@ export const PUBLIC_API_RATE_LIMITS = {
     maxAttempts: 40,
     windowMs: 15 * 60 * 1000,
   },
+  paymentManualSubmit: {
+    maxAttempts: 20,
+    windowMs: 15 * 60 * 1000,
+  },
 } as const satisfies Record<string, RateLimitConfig>;
 
 export const ADMIN_LOGIN_RATE_LIMIT = {

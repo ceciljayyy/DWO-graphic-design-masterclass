@@ -14,6 +14,7 @@ const config = {
         accent: "var(--accent)",
         "accent-foreground": "var(--accent-foreground)",
         red: "var(--red)",
+        "red-strong": "var(--red-strong)",
         brand: {
           black: "#080808",
           nearBlack: "#0a0505",

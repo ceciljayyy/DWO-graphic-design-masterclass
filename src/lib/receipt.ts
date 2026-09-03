@@ -27,8 +27,10 @@ function formatPaidAt(paidAt: string | null) {
 
 function formatPaymentStatus(status: string) {
   if (status === "PENDING") return "Pending";
+  if (status === "PAYMENT_SUBMITTED") return "Awaiting verification";
   if (status === "PAID") return "Paid";
   if (status === "FAILED") return "Failed";
+  if (status === "PAYMENT_REJECTED") return "Rejected";
   return status;
 }
 

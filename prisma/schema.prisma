@@ -14,8 +14,10 @@ enum ExperienceLevel {
 
 enum PaymentStatus {
   PENDING
+  PAYMENT_SUBMITTED
   PAID
   FAILED
+  PAYMENT_REJECTED
 }
 
 enum MarketingSource {
@@ -28,29 +30,35 @@ enum MarketingSource {
   OTHER
 }
 
+enum ManualPaymentMethod {
+  MTN_MOBILE_MONEY
+}
+
 model Registration {
-  id                      String          @id @default(cuid()) @db.VarChar(191)
-  registrationReference   String          @unique @db.VarChar(32)
-  fullName                String          @db.VarChar(191)
-  email                   String          @unique @db.VarChar(255)
-  phone                   String?         @db.VarChar(30)
-  whatsapp                String          @db.VarChar(30)
-  location                String          @db.VarChar(191)
-  experienceLevel         ExperienceLevel
-  paymentStatus           PaymentStatus   @default(PENDING)
-  amount                  Decimal         @db.Decimal(10, 2)
-  paystackReference       String?         @unique @db.VarChar(120)
-  paymentAuthorizationUrl String?         @db.VarChar(512)
-  paidAt                  DateTime?
-  confirmationEmailSentAt DateTime?
-  welcomeEmailSentAt        DateTime?
+  id                         String                    @id @default(cuid()) @db.VarChar(191)
+  registrationReference      String                    @unique @db.VarChar(32)
+  paymentAccessToken         String                    @unique @db.VarChar(64)
+  fullName                   String                    @db.VarChar(191)
+  email                      String                    @unique @db.VarChar(255)
+  phone                      String?                   @db.VarChar(30)
+  whatsapp                   String                    @db.VarChar(30)
+  location                   String                    @db.VarChar(191)
+  experienceLevel            ExperienceLevel
+  paymentStatus              PaymentStatus             @default(PENDING)
+  amount                     Decimal                   @db.Decimal(10, 2)
+  paystackReference          String?                   @unique @db.VarChar(120)
+  paymentAuthorizationUrl    String?                   @db.VarChar(512)
+  paidAt                     DateTime?
+  confirmationEmailSentAt    DateTime?
+  welcomeEmailSentAt         DateTime?
   paymentReminderEmailSentAt DateTime?
-  marketingSource         MarketingSource?
-  utmSource               String?          @db.VarChar(120)
-  utmMedium               String?          @db.VarChar(120)
-  utmCampaign             String?          @db.VarChar(191)
-  createdAt               DateTime        @default(now())
-  updatedAt               DateTime        @updatedAt
+  marketingSource            MarketingSource?
+  utmSource                  String?                   @db.VarChar(120)
+  utmMedium                  String?                   @db.VarChar(120)
+  utmCampaign                String?                   @db.VarChar(191)
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  manualPaymentSubmissions   ManualPaymentSubmission[]
 
   @@index([paymentStatus])
   @@index([createdAt])
@@ -58,6 +66,30 @@ model Registration {
   @@index([fullName])
   @@index([marketingSource])
   @@index([paymentStatus, paymentReminderEmailSentAt, createdAt])
+}
+
+model ManualPaymentSubmission {
+  id                   String              @id @default(cuid()) @db.VarChar(191)
+  registrationId       String              @db.VarChar(191)
+  registration         Registration        @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  method               ManualPaymentMethod @default(MTN_MOBILE_MONEY)
+  amount               Decimal             @db.Decimal(10, 2)
+  currency             String              @default("GHS") @db.VarChar(8)
+  senderName           String              @db.VarChar(191)
+  senderPhone          String              @db.VarChar(30)
+  transactionReference String?             @db.VarChar(120)
+  paymentDateTime      DateTime
+  isActive             Boolean             @default(true)
+  submittedAt          DateTime            @default(now())
+  reviewedAt           DateTime?
+  reviewedByAdminId    String?             @db.VarChar(191)
+  adminNote            String?             @db.Text
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([registrationId])
+  @@index([registrationId, isActive])
+  @@index([submittedAt])
 }
 
 model AdminUser {

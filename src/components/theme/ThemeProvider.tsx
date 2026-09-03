@@ -46,8 +46,6 @@ function readStoredTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Always match the SSR default first. Sync from localStorage only after mount
-  // so ThemeToggle markup does not mismatch during hydration.
   const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
 
   useEffect(() => {

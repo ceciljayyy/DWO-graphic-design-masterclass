@@ -1,6 +1,12 @@
 export const experienceLevelOptions = ["BEGINNER", "INTERMEDIATE", "ADVANCED"] as const;
 
-export const paymentStatusOptions = ["PENDING", "PAID", "FAILED"] as const;
+export const paymentStatusOptions = [
+  "PENDING",
+  "PAYMENT_SUBMITTED",
+  "PAID",
+  "FAILED",
+  "PAYMENT_REJECTED",
+] as const;
 
 export type ExperienceLevel = (typeof experienceLevelOptions)[number];
 
@@ -30,8 +36,10 @@ export type RegistrationValidationErrors = Partial<
 export type RegistrationCreateResponseData = {
   registrationId: string;
   registrationReference: string;
+  paymentAccessToken: string;
   paymentStatus: PaymentStatus;
   amount: string;
+  paymentMode: "MANUAL" | "PAYSTACK";
 };
 
 export type RegistrationApiSuccess = {

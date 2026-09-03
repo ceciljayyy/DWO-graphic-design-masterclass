@@ -98,7 +98,9 @@ export function parseRegistrationListQuery(
     paymentStatus:
       paymentStatus === "PAID" ||
       paymentStatus === "PENDING" ||
-      paymentStatus === "FAILED"
+      paymentStatus === "FAILED" ||
+      paymentStatus === "PAYMENT_SUBMITTED" ||
+      paymentStatus === "PAYMENT_REJECTED"
         ? paymentStatus
         : "ALL",
     experienceLevel:
@@ -170,14 +172,103 @@ export async function listRegistrations(query: RegistrationListQuery) {
   };
 }
 
+export async function listPaymentApprovals() {
+  const prisma = getPrismaClient();
+
+  const [awaitingReview, recentlyPaid] = await Promise.all([
+    prisma.registration.findMany({
+      where: { paymentStatus: "PAYMENT_SUBMITTED" },
+      orderBy: { updatedAt: "asc" },
+      include: {
+        manualPaymentSubmissions: {
+          where: { isActive: true },
+          orderBy: { submittedAt: "desc" },
+          take: 1,
+        },
+      },
+    }),
+    prisma.registration.findMany({
+      where: {
+        paymentStatus: "PAID",
+        paidAt: {
+          gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+        },
+      },
+      orderBy: { paidAt: "desc" },
+      take: 40,
+      select: {
+        id: true,
+        registrationReference: true,
+        fullName: true,
+        whatsapp: true,
+        amount: true,
+        paidAt: true,
+      },
+    }),
+  ]);
+
+  return {
+    awaitingReview: awaitingReview.map((registration) => {
+      const submission = registration.manualPaymentSubmissions[0] ?? null;
+      return {
+        id: registration.id,
+        registrationReference: registration.registrationReference,
+        fullName: registration.fullName,
+        email: registration.email,
+        phone: registration.phone,
+        whatsapp: registration.whatsapp,
+        paymentStatus: registration.paymentStatus,
+        amountDisplay: `${registrationFee.currency} ${Number(registration.amount).toFixed(2)}`,
+        createdAt: registration.createdAt.toISOString(),
+        updatedAt: registration.updatedAt.toISOString(),
+        submission: submission
+          ? {
+              id: submission.id,
+              method: submission.method,
+              methodLabel:
+                submission.method === "MTN_MOBILE_MONEY"
+                  ? "MTN Mobile Money"
+                  : submission.method,
+              amountDisplay: `${submission.currency} ${Number(submission.amount).toFixed(2)}`,
+              senderName: submission.senderName,
+              senderPhone: submission.senderPhone,
+              transactionReference: submission.transactionReference,
+              paymentDateTime: submission.paymentDateTime.toISOString(),
+              submittedAt: submission.submittedAt.toISOString(),
+              reviewedAt: submission.reviewedAt?.toISOString() ?? null,
+              adminNote: submission.adminNote,
+            }
+          : null,
+      };
+    }),
+    recentlyPaid: recentlyPaid.map((item) => ({
+      id: item.id,
+      registrationReference: item.registrationReference,
+      fullName: item.fullName,
+      whatsapp: item.whatsapp,
+      amountDisplay: `${registrationFee.currency} ${Number(item.amount).toFixed(2)}`,
+      paidAt: item.paidAt?.toISOString() ?? null,
+    })),
+  };
+}
+
 export async function getRegistrationById(id: string) {
   const registration = await getPrismaClient().registration.findUnique({
     where: { id },
+    include: {
+      manualPaymentSubmissions: {
+        where: { isActive: true },
+        orderBy: { submittedAt: "desc" },
+        take: 1,
+      },
+    },
   });
 
   if (!registration) {
     return null;
   }
+
+  const activeSubmission = registration.manualPaymentSubmissions[0] ?? null;
 
   return {
     id: registration.id,
@@ -205,6 +296,24 @@ export async function getRegistrationById(id: string) {
     utmCampaign: registration.utmCampaign,
     createdAt: registration.createdAt.toISOString(),
     updatedAt: registration.updatedAt.toISOString(),
+    activeManualPayment: activeSubmission
+      ? {
+          id: activeSubmission.id,
+          method: activeSubmission.method,
+          methodLabel:
+            activeSubmission.method === "MTN_MOBILE_MONEY"
+              ? "MTN Mobile Money"
+              : activeSubmission.method,
+          amountDisplay: `${activeSubmission.currency} ${Number(activeSubmission.amount).toFixed(2)}`,
+          senderName: activeSubmission.senderName,
+          senderPhone: activeSubmission.senderPhone,
+          transactionReference: activeSubmission.transactionReference,
+          paymentDateTime: activeSubmission.paymentDateTime.toISOString(),
+          submittedAt: activeSubmission.submittedAt.toISOString(),
+          reviewedAt: activeSubmission.reviewedAt?.toISOString() ?? null,
+          adminNote: activeSubmission.adminNote,
+        }
+      : null,
   };
 }
 
@@ -215,7 +324,9 @@ export async function getDashboardAnalytics() {
     totalRegistrations,
     paidRegistrations,
     pendingRegistrations,
+    submittedRegistrations,
     failedRegistrations,
+    rejectedRegistrations,
     revenueAggregate,
     latestRegistrations,
     recentPaid,
@@ -223,7 +334,9 @@ export async function getDashboardAnalytics() {
     prisma.registration.count(),
     prisma.registration.count({ where: { paymentStatus: "PAID" } }),
     prisma.registration.count({ where: { paymentStatus: "PENDING" } }),
+    prisma.registration.count({ where: { paymentStatus: "PAYMENT_SUBMITTED" } }),
     prisma.registration.count({ where: { paymentStatus: "FAILED" } }),
+    prisma.registration.count({ where: { paymentStatus: "PAYMENT_REJECTED" } }),
     prisma.registration.aggregate({
       where: { paymentStatus: "PAID" },
       _sum: { amount: true },
@@ -261,14 +374,18 @@ export async function getDashboardAnalytics() {
       totalRegistrations,
       paidRegistrations,
       pendingRegistrations,
+      submittedRegistrations,
       failedRegistrations,
+      rejectedRegistrations,
       revenue,
       revenueDisplay: `${registrationFee.currency} ${revenue.toFixed(2)}`,
     },
     paymentBreakdown: [
       { status: "PAID" as const, count: paidRegistrations },
       { status: "PENDING" as const, count: pendingRegistrations },
+      { status: "PAYMENT_SUBMITTED" as const, count: submittedRegistrations },
       { status: "FAILED" as const, count: failedRegistrations },
+      { status: "PAYMENT_REJECTED" as const, count: rejectedRegistrations },
     ],
     latestRegistrations: latestRegistrations.map((item) => ({
       ...item,

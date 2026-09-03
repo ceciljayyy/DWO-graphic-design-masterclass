@@ -7,8 +7,10 @@ import {
   isDatabaseConnectionError,
   resetPrismaClient,
 } from "@/lib/prisma";
+import { generatePaymentAccessToken } from "@/lib/payment-access";
 import { registrationConfiguration } from "@/lib/registration";
 import type { NormalizedRegistrationInput } from "@/lib/registration";
+import type { PaymentStatus } from "@prisma/client";
 
 /** Readable public reference format: DWO-8K4P2M */
 const REFERENCE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -47,10 +49,10 @@ function getErrorMessage(error: unknown) {
 
 export class DuplicateRegistrationError extends Error {
   readonly field: "email";
-  readonly paymentStatus: "PAID" | "PENDING" | "FAILED";
+  readonly paymentStatus: PaymentStatus;
 
   constructor(
-    paymentStatus: "PAID" | "PENDING" | "FAILED" = "PAID",
+    paymentStatus: PaymentStatus = "PAID",
     field: "email" = "email",
   ) {
     super("Duplicate registration");
@@ -90,6 +92,7 @@ async function createWithUniqueReference(
       return await getPrismaClient().registration.create({
         data: {
           registrationReference,
+          paymentAccessToken: generatePaymentAccessToken(),
           fullName: data.fullName,
           email: data.email,
           phone: data.phone,
@@ -165,8 +168,13 @@ export async function createRegistrationRecord(data: NormalizedRegistrationInput
           whatsapp: data.whatsapp,
           location: data.location,
           experienceLevel: data.experienceLevel,
+          paymentAccessToken:
+            existing.paymentAccessToken || generatePaymentAccessToken(),
           paymentStatus:
-            existing.paymentStatus === "FAILED" ? "PENDING" : existing.paymentStatus,
+            existing.paymentStatus === "FAILED" ||
+            existing.paymentStatus === "PAYMENT_REJECTED"
+              ? "PENDING"
+              : existing.paymentStatus,
         },
       });
     }
@@ -197,8 +205,13 @@ export async function createRegistrationRecord(data: NormalizedRegistrationInput
               whatsapp: data.whatsapp,
               location: data.location,
               experienceLevel: data.experienceLevel,
+              paymentAccessToken:
+                raced.paymentAccessToken || generatePaymentAccessToken(),
               paymentStatus:
-                raced.paymentStatus === "FAILED" ? "PENDING" : raced.paymentStatus,
+                raced.paymentStatus === "FAILED" ||
+                raced.paymentStatus === "PAYMENT_REJECTED"
+                  ? "PENDING"
+                  : raced.paymentStatus,
             },
           });
         }

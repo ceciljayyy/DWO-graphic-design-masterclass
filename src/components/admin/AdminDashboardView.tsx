@@ -41,36 +41,95 @@ export function AdminDashboardView({
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         {[
           {
             label: "Total Registrations",
             value: String(data.totals.totalRegistrations),
+            href: "/admin/registrations",
           },
           {
             label: "Paid Registrations",
             value: String(data.totals.paidRegistrations),
+            href: "/admin/registrations?paymentStatus=PAID",
           },
           {
             label: "Pending Payments",
             value: String(data.totals.pendingRegistrations),
+            href: "/admin/registrations?paymentStatus=PENDING",
           },
           {
-            label: "Failed Payments",
-            value: String(data.totals.failedRegistrations),
+            label: "Awaiting Approval",
+            value: String(data.totals.submittedRegistrations),
+            href: "/admin/payments",
+            highlight: data.totals.submittedRegistrations > 0,
           },
-          { label: "Total Revenue", value: data.totals.revenueDisplay },
+          {
+            label: "Rejected / Failed",
+            value: String(
+              data.totals.failedRegistrations + data.totals.rejectedRegistrations,
+            ),
+            href: "/admin/registrations?paymentStatus=PAYMENT_REJECTED",
+          },
+          {
+            label: "Total Revenue",
+            value: data.totals.revenueDisplay,
+            href: "/admin/payments",
+          },
         ].map((card) => (
-          <article key={card.label} className="border border-border bg-surface p-5">
+          <Link
+            key={card.label}
+            href={card.href}
+            className={cn(
+              "border bg-surface p-5 transition-colors hover:border-accent",
+              "highlight" in card && card.highlight
+                ? "border-accent/50 shadow-[0_0_24px_rgba(244,185,66,0.08)]"
+                : "border-border",
+            )}
+          >
             <p className="font-display text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
               {card.label}
             </p>
             <p className="mt-3 font-display text-2xl font-extrabold tracking-tightest text-foreground">
               {card.value}
             </p>
-          </article>
+            {"highlight" in card && card.highlight ? (
+              <p className="mt-2 font-display text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
+                Review now →
+              </p>
+            ) : null}
+          </Link>
         ))}
       </div>
+
+      {data.totals.submittedRegistrations > 0 ? (
+        <aside className="relative overflow-hidden border-2 border-accent/45 bg-accent/10 p-5">
+          <div
+            aria-hidden
+            className="absolute inset-y-0 left-0 w-1.5 bg-accent"
+          />
+          <p className="font-display text-xs font-extrabold uppercase tracking-[0.22em] text-accent">
+            Action needed
+          </p>
+          <p className="mt-2 text-sm leading-7 text-foreground">
+            <strong>{data.totals.submittedRegistrations}</strong> payment
+            {data.totals.submittedRegistrations === 1 ? "" : "s"} waiting for
+            manual verification.
+          </p>
+          <Link
+            href="/admin/payments"
+            className="mt-4 inline-flex min-h-11 items-center justify-center rounded-sm bg-accent px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-accent/90"
+          >
+            Open payment approvals
+          </Link>
+          <Link
+            href="/admin/whatsapp-contacts"
+            className="mt-3 ml-0 inline-flex min-h-11 items-center justify-center rounded-sm border border-border px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-accent hover:text-accent sm:ml-3"
+          >
+            Paid WhatsApp contacts
+          </Link>
+        </aside>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
         <RegistrationAnalytics initialData={analytics} />
@@ -96,9 +155,12 @@ export function AdminDashboardView({
                         "h-2 rounded-sm",
                         item.status === "PAID"
                           ? "bg-accent"
-                          : item.status === "FAILED"
+                          : item.status === "FAILED" ||
+                              item.status === "PAYMENT_REJECTED"
                             ? "bg-red"
-                            : "bg-muted",
+                            : item.status === "PAYMENT_SUBMITTED"
+                              ? "bg-accent/50"
+                              : "bg-muted",
                       )}
                       style={{ width: `${width}%` }}
                     />
