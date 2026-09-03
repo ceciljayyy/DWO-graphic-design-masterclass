@@ -28,3 +28,7 @@ pnpm-debug.log*
 *.pem
 .vercel/
 .turbo/
+
+# local Lighthouse audits
+lighthouse-*.json
+lighthouse-report.json

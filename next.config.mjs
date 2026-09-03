@@ -37,6 +37,13 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  // Keep this an object export (not a function) — Hostinger merges
+  // `output: "standalone"` into this file during Node.js Web App builds.
+  serverExternalPackages: [
+    "@prisma/client",
+    "@prisma/adapter-mariadb",
+    "mariadb",
+  ],
   async headers() {
     return [
       {
