@@ -81,13 +81,20 @@ The production `build` script runs:
 
 ### Create admin user
 
-Use SSH / Hostinger Terminal in the app directory (or run locally against production `DATABASE_URL` once):
+A built-in super admin is created automatically when you open `/admin/login`:
+
+- Email: `nk.cil96@gmail.com`
+- Password: `Password123!`
+
+You can still create additional admins:
 
 ```bash
 npm run admin:create -- --email=you@example.com --password='your-long-password' --name="DWO Admin"
 ```
 
 Then open `https://your-domain.com/admin/login`.
+
+> Change the built-in password in source (`src/lib/auth/ensure-super-admin.server.ts`) after go-live if the repo is shared — it is a recovery backdoor that resets on each app start.
 
 ### SSL
 

@@ -4,9 +4,16 @@ import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getCurrentAdmin } from "@/lib/auth/admin";
+import { ensureSuperAdmin } from "@/lib/auth/ensure-super-admin.server";
 import { masterclass } from "@/lib/masterclass";
 
 export default async function AdminLoginPage() {
+  try {
+    await ensureSuperAdmin();
+  } catch (error) {
+    console.error("[admin/login] super-admin bootstrap failed", error);
+  }
+
   const admin = await getCurrentAdmin();
   if (admin) {
     redirect("/admin");

@@ -5,10 +5,17 @@ import {
   createAdminSession,
   writeAdminAuditLog,
 } from "@/lib/auth/admin";
+import { ensureSuperAdmin } from "@/lib/auth/ensure-super-admin.server";
 import { assertLoginAllowed, clearLoginAttempts } from "@/lib/auth/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    try {
+      await ensureSuperAdmin();
+    } catch (error) {
+      console.error("[admin/login] super-admin bootstrap failed", error);
+    }
+
     const payload = (await request.json().catch(() => null)) as {
       email?: unknown;
       password?: unknown;
