@@ -7,6 +7,7 @@ use App\Support\RegistrationReference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,6 +18,7 @@ class RegistrationController extends Controller
         return Inertia::render('Register', [
             'masterclass' => config('masterclass'),
             'experienceLevels' => ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'],
+            'locationOptions' => config('masterclass.locations'),
             'schedules' => [
                 ['value' => 'WEEKDAYS', 'label' => 'Weekdays (Monday – Friday)'],
                 ['value' => 'WEEKENDS', 'label' => 'Weekends (Saturday & Sunday)'],
@@ -26,12 +28,18 @@ class RegistrationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $locations = config('masterclass.locations');
+        $countries = array_keys($locations);
+        $country = (string) $request->input('country', '');
+        $cityOptions = $locations[$country] ?? [];
+
         $data = $request->validate([
             'full_name' => ['required', 'string', 'max:191', 'regex:/^[A-Za-z][A-Za-z\'\-]*(?:\s+[A-Za-z][A-Za-z\'\-]*)+$/'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'whatsapp' => ['required', 'string', 'max:30'],
-            'location' => ['required', 'string', 'max:191'],
+            'country' => ['required', 'string', Rule::in($countries)],
+            'location' => ['required', 'string', 'max:191', Rule::in($cityOptions)],
             'experience_level' => ['required', 'in:BEGINNER,INTERMEDIATE,ADVANCED'],
             'schedule' => ['required', 'in:WEEKDAYS,WEEKENDS'],
             'marketing_source' => ['nullable', 'in:INSTAGRAM,TIKTOK,WHATSAPP,FACEBOOK,GOOGLE,DIRECT,OTHER'],
@@ -55,7 +63,7 @@ class RegistrationController extends Controller
                 'email' => $email,
                 'phone' => $data['phone'] ?: null,
                 'whatsapp' => $data['whatsapp'],
-                'location' => $data['location'],
+                'location' => $data['location'].', '.$data['country'],
                 'experience_level' => $data['experience_level'],
                 'schedule' => $data['schedule'],
                 'amount' => config('masterclass.fee.amount'),

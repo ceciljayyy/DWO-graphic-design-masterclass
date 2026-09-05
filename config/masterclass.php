@@ -21,6 +21,42 @@ return [
         'date' => '2026-09-04',
         'display' => '4 September 2026',
     ],
+    'locations' => [
+        'Ghana' => [
+            'Accra',
+            'Kumasi',
+            'Tema',
+            'Takoradi',
+            'Cape Coast',
+            'Tamale',
+            'Koforidua',
+            'Ho',
+            'Sunyani',
+            'Wa',
+            'Bolgatanga',
+        ],
+        'Nigeria' => [
+            'Lagos',
+            'Abuja',
+            'Port Harcourt',
+            'Ibadan',
+            'Kano',
+        ],
+        'United Kingdom' => [
+            'London',
+            'Manchester',
+            'Birmingham',
+        ],
+        'United States' => [
+            'New York',
+            'Atlanta',
+            'Washington, DC',
+            'Los Angeles',
+        ],
+        'Other' => [
+            'Other',
+        ],
+    ],
     'skills' => [
         'Graphic Design',
         'Content Creation',
