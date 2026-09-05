@@ -7,7 +7,9 @@
         <meta name="theme-color" content="#0b0b0c">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('brand/dwo-logo-white.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('brand/dwo-logo-white.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('brand/dwo-logo-white.png') }}">
         <script>
             (function () {
                 try {
@@ -24,6 +26,7 @@
                 }
             })();
         </script>
+      
 
         <!-- Fonts: display (Bebas) + UI (Figtree) -->
         <link rel="preconnect" href="https://fonts.bunny.net">
