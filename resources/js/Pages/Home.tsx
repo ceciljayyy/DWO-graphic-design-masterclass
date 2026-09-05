@@ -1,3 +1,4 @@
+import CourseCountdown from '@/Components/CourseCountdown';
 import SelectedWorkGallery from '@/Components/SelectedWorkGallery';
 import StudentResults from '@/Components/StudentResults';
 import ThemeToggle from '@/Components/ThemeToggle';
@@ -22,6 +23,11 @@ type Masterclass = {
 
 type Props = {
     masterclass: Masterclass;
+    countdown: {
+        courseStartsAt: string;
+        serverNow: string;
+        timezone: string;
+    };
     portfolio: { src: string; category: string }[];
     studentWork: {
         before: string[];
@@ -36,7 +42,7 @@ const navLinks = [
     { href: '#faq', label: 'FAQ' },
 ];
 
-export default function Home({ masterclass, portfolio, studentWork }: Props) {
+export default function Home({ masterclass, countdown, portfolio }: Props) {
     return (
         <div className="dwo-page">
             <Head title={`${masterclass.brand} · ${masterclass.name}`} />
@@ -179,9 +185,15 @@ export default function Home({ masterclass, portfolio, studentWork }: Props) {
                     </div>
                 </section>
 
-                <SelectedWorkGallery items={portfolio} />
+                <CourseCountdown
+                    courseStartsAt={countdown.courseStartsAt}
+                    serverNow={countdown.serverNow}
+                    timezone={countdown.timezone}
+                />
 
-                <StudentResults studentWork={studentWork} />
+                <StudentResults />
+
+                <SelectedWorkGallery items={portfolio} />
 
                 <section id="instructor" className="relative overflow-hidden border-t border-[color:var(--dwo-border)] py-16 md:py-24">
                     <div

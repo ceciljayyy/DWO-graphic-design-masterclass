@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,6 +21,8 @@ class HomeController extends Controller
 
     public function __invoke(): Response
     {
+        $courseStartsAt = Carbon::parse(config('masterclass.course_starts_at'), config('app.timezone'));
+
         return Inertia::render('Home', [
             'masterclass' => [
                 ...config('masterclass'),
@@ -27,6 +30,11 @@ class HomeController extends Controller
                     ...config('masterclass.instructor'),
                     'image' => asset(config('masterclass.instructor.image', 'instructor/james-baiden-otabil.jpg')),
                 ],
+            ],
+            'countdown' => [
+                'courseStartsAt' => $courseStartsAt->toIso8601String(),
+                'serverNow' => now()->toIso8601String(),
+                'timezone' => config('app.timezone'),
             ],
             'portfolio' => $this->portfolioItems(),
             'studentWork' => [

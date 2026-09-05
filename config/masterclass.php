@@ -16,6 +16,7 @@ return [
         'end' => '2026-10-21',
         'display' => '21 September – 21 October 2026',
     ],
+    'course_starts_at' => '2026-09-21 00:00:00',
     'registration_starts' => [
         'date' => '2026-09-04',
         'display' => '4 September 2026',
