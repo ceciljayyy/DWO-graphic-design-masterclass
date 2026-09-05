@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentRejected;
 use App\Mail\RegistrationPaymentConfirmed;
 use App\Models\AdminAuditLog;
 use App\Models\Registration;
+use App\Support\SafeMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -95,13 +96,11 @@ class PaymentReviewController extends Controller
         }
 
         if ($shouldSendConfirmation && $registrationForMail) {
-            Mail::to($registrationForMail->email)->send(
-                new RegistrationPaymentConfirmed($registrationForMail)
-            );
-
-            Registration::query()->whereKey($registrationForMail->id)->whereNull('confirmation_email_sent_at')->update([
-                'confirmation_email_sent_at' => now(),
-            ]);
+            if (SafeMail::send($registrationForMail->email, new RegistrationPaymentConfirmed($registrationForMail))) {
+                Registration::query()->whereKey($registrationForMail->id)->whereNull('confirmation_email_sent_at')->update([
+                    'confirmation_email_sent_at' => now(),
+                ]);
+            }
         }
 
         return back()->with('success', 'Payment verified.');
@@ -114,8 +113,10 @@ class PaymentReviewController extends Controller
         ]);
 
         $error = null;
+        $registrationForMail = null;
+        $adminNote = $data['admin_note'] ?? null;
 
-        DB::transaction(function () use ($id, $data, &$error) {
+        DB::transaction(function () use ($id, $data, &$error, &$registrationForMail) {
             $registration = Registration::query()
                 ->with('activeManualPaymentSubmission')
                 ->whereKey($id)
@@ -142,10 +143,19 @@ class PaymentReviewController extends Controller
             AdminAuditLog::record((string) Auth::id(), 'MANUAL_PAYMENT_REJECTED', [
                 'registration_id' => $registration->id,
             ]);
+
+            $registrationForMail = $registration->fresh();
         });
 
         if ($error) {
             return back()->with('error', $error);
+        }
+
+        if ($registrationForMail) {
+            SafeMail::send(
+                $registrationForMail->email,
+                new PaymentRejected($registrationForMail, $adminNote)
+            );
         }
 
         return back()->with('success', 'Payment rejected.');

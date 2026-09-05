@@ -9,28 +9,33 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class RegistrationPaymentConfirmed extends Mailable
+class PaymentRejected extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Registration $registration) {}
+    public function __construct(
+        public Registration $registration,
+        public ?string $adminNote = null,
+    ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment confirmed — '.config('masterclass.name'),
+            subject: 'Payment not verified — '.config('masterclass.name'),
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            html: 'mail.registration-payment-confirmed',
-            text: 'mail.registration-payment-confirmed-text',
+            html: 'mail.payment-rejected',
+            text: 'mail.payment-rejected-text',
             with: [
                 'registration' => $this->registration,
                 'masterclass' => config('masterclass'),
-                'subject' => 'Payment confirmed',
+                'adminNote' => $this->adminNote,
+                'paymentUrl' => route('payment.show', $this->registration->payment_access_token),
+                'subject' => 'Payment not verified',
             ],
         );
     }

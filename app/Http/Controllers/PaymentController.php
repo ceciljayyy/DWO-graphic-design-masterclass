@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PaymentSubmitted;
 use App\Models\Registration;
+use App\Support\SafeMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -145,6 +147,9 @@ class PaymentController extends Controller
 
             $registration->update(['payment_status' => 'PAYMENT_SUBMITTED']);
         });
+
+        $registration = $registration->fresh();
+        SafeMail::send($registration->email, new PaymentSubmitted($registration));
 
         return redirect()->route('payment.submitted', ['token' => $token]);
     }

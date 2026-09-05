@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\RegistrationWelcome;
 use App\Models\Registration;
 use App\Support\RegistrationReference;
+use App\Support\SafeMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,6 +91,12 @@ class RegistrationController extends Controller
                 'payment_status' => 'PENDING',
             ]);
         });
+
+        if ($registration->welcome_email_sent_at === null) {
+            if (SafeMail::send($registration->email, new RegistrationWelcome($registration))) {
+                $registration->forceFill(['welcome_email_sent_at' => now()])->save();
+            }
+        }
 
         return redirect()->route('payment.success', [
             'token' => $registration->payment_access_token,

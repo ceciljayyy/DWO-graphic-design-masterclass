@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class RegistrationPaymentConfirmed extends Mailable
+class RegistrationWelcome extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -18,19 +18,20 @@ class RegistrationPaymentConfirmed extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment confirmed — '.config('masterclass.name'),
+            subject: 'Complete your payment — '.config('masterclass.name'),
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            html: 'mail.registration-payment-confirmed',
-            text: 'mail.registration-payment-confirmed-text',
+            html: 'mail.registration-welcome',
+            text: 'mail.registration-welcome-text',
             with: [
                 'registration' => $this->registration,
                 'masterclass' => config('masterclass'),
-                'subject' => 'Payment confirmed',
+                'paymentUrl' => route('payment.show', $this->registration->payment_access_token),
+                'subject' => 'Registration received',
             ],
         );
     }
