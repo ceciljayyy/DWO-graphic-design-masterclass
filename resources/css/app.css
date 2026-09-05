@@ -161,6 +161,14 @@
         color: var(--dwo-muted);
     }
 
+    .dwo-brand-logo {
+        filter: invert(1);
+    }
+
+    html.dark .dwo-brand-logo {
+        filter: none;
+    }
+
     .dwo-accent-btn {
         display: inline-flex;
         align-items: center;

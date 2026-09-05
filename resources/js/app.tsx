@@ -5,7 +5,8 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 
-const appName = import.meta.env.VITE_APP_NAME || 'DWO Masterclass';
+const configuredAppName = import.meta.env.VITE_APP_NAME;
+const appName = configuredAppName && configuredAppName !== 'Laravel' ? configuredAppName : 'DWO Masterclass';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

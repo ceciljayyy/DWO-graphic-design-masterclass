@@ -1,0 +1,1 @@
+import{c as e}from"./app-BsuwUOpj.js";var t=e(),n={full:`/brand/dwo-logo-white.png`,mark:`/brand/dwo-logo-white.png`};function r({variant:e=`mark`,className:r=``,alt:i=`DWO`,...a}){return(0,t.jsx)(`img`,{src:n[e],alt:i,draggable:!1,className:`dwo-brand-logo inline-block h-auto w-auto select-none object-contain ${r}`,...a})}export{r as t};
