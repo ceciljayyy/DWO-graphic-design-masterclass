@@ -1,3 +1,226 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    /* Light theme */
+    :root {
+        --dwo-bg: #f3f1ee;
+        --dwo-bg-elevated: rgba(255, 255, 255, 0.72);
+        --dwo-bg-soft: rgba(255, 255, 255, 0.45);
+        --dwo-border: rgba(24, 24, 27, 0.12);
+        --dwo-text: #18181b;
+        --dwo-muted: #52525b;
+        --dwo-accent: #b45309;
+        --dwo-accent-contrast: #ffffff;
+        --dwo-danger: #e11d48;
+        --dwo-header: rgba(243, 241, 238, 0.72);
+        --dwo-glow: rgba(180, 83, 9, 0.22);
+        --dwo-glow-strong: rgba(180, 83, 9, 0.35);
+        --dwo-glass: rgba(255, 255, 255, 0.55);
+        --dwo-glass-border: rgba(24, 24, 27, 0.14);
+        --dwo-page-gradient:
+            radial-gradient(ellipse 90% 70% at 80% 0%, var(--dwo-glow) 0%, transparent 55%),
+            radial-gradient(ellipse 70% 55% at 10% 30%, rgba(180, 83, 9, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse 100% 80% at 50% 100%, rgba(24, 24, 27, 0.06) 0%, transparent 45%),
+            linear-gradient(180deg, #f7f5f2 0%, #efece7 45%, #f3f1ee 100%);
+        color-scheme: light;
+    }
+
+    /* Dark theme — keep lime accent; gradient atmosphere, not flat black */
+    html.dark {
+        --dwo-bg: #070708;
+        --dwo-bg-elevated: rgba(20, 20, 22, 0.72);
+        --dwo-bg-soft: rgba(24, 24, 27, 0.55);
+        --dwo-border: rgba(255, 255, 255, 0.1);
+        --dwo-text: #fafafa;
+        --dwo-muted: #a1a1aa;
+        --dwo-accent: #e8ff47;
+        --dwo-accent-contrast: #000000;
+        --dwo-danger: #e11d48;
+        --dwo-header: rgba(7, 7, 8, 0.65);
+        --dwo-glow: rgba(232, 255, 71, 0.12);
+        --dwo-glow-strong: rgba(232, 255, 71, 0.22);
+        --dwo-glass: rgba(18, 18, 20, 0.45);
+        --dwo-glass-border: rgba(255, 255, 255, 0.12);
+        --dwo-page-gradient:
+            radial-gradient(ellipse 85% 65% at 85% 5%, var(--dwo-glow-strong) 0%, transparent 50%),
+            radial-gradient(ellipse 60% 50% at 0% 40%, rgba(232, 255, 71, 0.06) 0%, transparent 55%),
+            radial-gradient(ellipse 80% 60% at 70% 90%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+            linear-gradient(165deg, #0c0c0e 0%, #080809 40%, #050506 100%);
+        color-scheme: dark;
+    }
+
+    body {
+        @apply font-sans antialiased;
+        background-color: var(--dwo-bg);
+        background-image: var(--dwo-page-gradient);
+        background-attachment: fixed;
+        color: var(--dwo-text);
+        min-height: 100vh;
+    }
+
+    ::selection {
+        background: color-mix(in srgb, var(--dwo-accent) 40%, transparent);
+        color: var(--dwo-text);
+    }
+}
+
+@layer components {
+    .dwo-container {
+        @apply mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-8 xl:px-10 2xl:px-12;
+    }
+
+    .dwo-page {
+        position: relative;
+        min-height: 100vh;
+        color: var(--dwo-text);
+        background: transparent;
+        isolation: isolate;
+    }
+
+    .dwo-page::before {
+        content: '';
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background-image: var(--dwo-page-gradient);
+        background-attachment: fixed;
+    }
+
+    .dwo-display {
+        font-family: 'Bebas Neue', Impact, Haettenschweiler, sans-serif;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        line-height: 0.92;
+        font-weight: 400;
+    }
+
+    .dwo-label {
+        @apply text-[10px] font-semibold uppercase tracking-[0.22em] sm:text-xs;
+        color: var(--dwo-muted);
+    }
+
+    .dwo-glass {
+        border: 1px solid var(--dwo-glass-border);
+        background: var(--dwo-glass);
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 20px 50px rgba(0, 0, 0, 0.18);
+        color: var(--dwo-text);
+    }
+
+    .dwo-glass-panel {
+        position: relative;
+        border: 1px solid transparent;
+        background:
+            linear-gradient(var(--dwo-glass), var(--dwo-glass)) padding-box,
+            linear-gradient(
+                135deg,
+                color-mix(in srgb, var(--dwo-accent) 55%, transparent),
+                rgba(255, 255, 255, 0.18) 40%,
+                color-mix(in srgb, var(--dwo-accent) 25%, transparent)
+            )
+            border-box;
+        backdrop-filter: blur(22px) saturate(150%);
+        -webkit-backdrop-filter: blur(22px) saturate(150%);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.08) inset,
+            0 24px 60px rgba(0, 0, 0, 0.25),
+            0 0 60px color-mix(in srgb, var(--dwo-accent) 12%, transparent);
+        color: var(--dwo-text);
+    }
+
+    .dwo-card {
+        border-radius: 0;
+        border: 1px solid var(--dwo-glass-border);
+        background: var(--dwo-glass);
+        backdrop-filter: blur(16px) saturate(140%);
+        -webkit-backdrop-filter: blur(16px) saturate(140%);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.05) inset,
+            0 16px 40px rgba(0, 0, 0, 0.14);
+        color: var(--dwo-text);
+    }
+
+    .dwo-header-bar {
+        border-bottom: 1px solid var(--dwo-glass-border);
+        background: var(--dwo-header);
+        backdrop-filter: blur(16px) saturate(140%);
+        -webkit-backdrop-filter: blur(16px) saturate(140%);
+    }
+
+    .dwo-muted {
+        color: var(--dwo-muted);
+    }
+
+    .dwo-accent-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0;
+        background-color: var(--dwo-accent);
+        color: var(--dwo-accent-contrast);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .dwo-accent-btn:hover {
+        opacity: 0.92;
+    }
+
+    .dwo-ghost-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0;
+        border: 1px solid var(--dwo-border);
+        background: transparent;
+        color: var(--dwo-text);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .dwo-ghost-btn:hover {
+        border-color: color-mix(in srgb, var(--dwo-text) 40%, transparent);
+        background: color-mix(in srgb, var(--dwo-text) 4%, transparent);
+    }
+
+    .dwo-input {
+        @apply rounded-none shadow-none;
+        border-color: var(--dwo-glass-border);
+        background-color: color-mix(in srgb, var(--dwo-bg-elevated) 80%, transparent);
+        color: var(--dwo-text);
+        backdrop-filter: blur(8px);
+    }
+
+    .dwo-input:focus {
+        --tw-ring-color: var(--dwo-accent);
+        border-color: var(--dwo-accent);
+    }
+
+    .dwo-divider {
+        border-color: var(--dwo-border);
+    }
+
+    .dwo-hero-glow {
+        pointer-events: none;
+        position: absolute;
+        inset: auto;
+        right: -8%;
+        top: -10%;
+        width: min(52vw, 640px);
+        height: min(52vw, 640px);
+        border-radius: 9999px;
+        background: radial-gradient(circle, var(--dwo-glow-strong) 0%, transparent 68%);
+        filter: blur(8px);
+        opacity: 0.9;
+    }
+}

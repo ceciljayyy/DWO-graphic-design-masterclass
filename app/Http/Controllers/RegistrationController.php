@@ -17,6 +17,10 @@ class RegistrationController extends Controller
         return Inertia::render('Register', [
             'masterclass' => config('masterclass'),
             'experienceLevels' => ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'],
+            'schedules' => [
+                ['value' => 'WEEKDAYS', 'label' => 'Weekdays (Monday – Friday)'],
+                ['value' => 'WEEKENDS', 'label' => 'Weekends (Saturday & Sunday)'],
+            ],
         ]);
     }
 
@@ -29,6 +33,7 @@ class RegistrationController extends Controller
             'whatsapp' => ['required', 'string', 'max:30'],
             'location' => ['required', 'string', 'max:191'],
             'experience_level' => ['required', 'in:BEGINNER,INTERMEDIATE,ADVANCED'],
+            'schedule' => ['required', 'in:WEEKDAYS,WEEKENDS'],
             'marketing_source' => ['nullable', 'in:INSTAGRAM,TIKTOK,WHATSAPP,FACEBOOK,GOOGLE,DIRECT,OTHER'],
             'utm_source' => ['nullable', 'string', 'max:120'],
             'utm_medium' => ['nullable', 'string', 'max:120'],
@@ -52,6 +57,7 @@ class RegistrationController extends Controller
                 'whatsapp' => $data['whatsapp'],
                 'location' => $data['location'],
                 'experience_level' => $data['experience_level'],
+                'schedule' => $data['schedule'],
                 'amount' => config('masterclass.fee.amount'),
                 'marketing_source' => $data['marketing_source'] ?? null,
                 'utm_source' => $data['utm_source'] ?? null,
@@ -76,7 +82,7 @@ class RegistrationController extends Controller
             ]);
         });
 
-        return redirect()->route('payment.show', [
+        return redirect()->route('payment.success', [
             'token' => $registration->payment_access_token,
         ]);
     }

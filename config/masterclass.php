@@ -5,7 +5,7 @@ return [
     'brand_full' => 'Design With Otabil',
     'name' => 'Graphic Design & Media Class',
     'short_name' => 'Design & Media Class',
-    'description' => 'Join the Graphic Design & Media Class and learn Graphic Design, Content Creation, Social Media Management, and Reels Making.',
+    'description' => 'A focused creative class covering Graphic Design, Content Creation, Social Media Management, and Reels Making.',
     'fee' => [
         'currency' => 'GHS',
         'amount' => 700,
@@ -31,6 +31,20 @@ return [
         'method_label' => 'MTN Mobile Money',
         'number' => '0530138872',
         'account_name' => 'JAMES BAIDEN OTABIL',
+        'networks' => [
+            [
+                'value' => 'MTN',
+                'label' => 'MTN',
+            ],
+            [
+                'value' => 'TELECEL',
+                'label' => 'Telecel (Vodafone)',
+            ],
+            [
+                'value' => 'AIRTELTIGO',
+                'label' => 'AT (AirtelTigo)',
+            ],
+        ],
     ],
     'contact' => [
         'phones' => [
@@ -45,7 +59,8 @@ return [
     'instructor' => [
         'name' => 'James Baiden Otabil',
         'role' => 'Creative Director · Design With Otabil',
-        'bio' => 'James Baiden Otabil isn’t just a graphic designer — he’s a visual storyteller. With over six years of hands-on experience, he transforms ideas into designs that speak, sell, and stick.',
+        'bio' => 'James Baiden Otabil isn’t just a graphic designer — he’s a visual storyteller. With over six years of hands-on experience, he transforms ideas into designs that speak, sell, and stick. His work includes collaborations with brands and personalities from Raphiya to theBandFRA! and Dave Da Musicbox.',
+        'image' => 'instructor/james-baiden-otabil.jpg',
     ],
     'faqs' => [
         [

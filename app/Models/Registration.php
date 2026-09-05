@@ -20,6 +20,7 @@ class Registration extends Model
         'whatsapp',
         'location',
         'experience_level',
+        'schedule',
         'payment_status',
         'amount',
         'paystack_reference',

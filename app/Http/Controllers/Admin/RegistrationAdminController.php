@@ -59,6 +59,7 @@ class RegistrationAdminController extends Controller
                 'whatsapp' => $registration->whatsapp,
                 'location' => $registration->location,
                 'experience_level' => $registration->experience_level,
+                'schedule' => $registration->schedule,
                 'payment_status' => $registration->payment_status,
                 'reference' => $registration->registration_reference,
                 'amount' => (float) $registration->amount,

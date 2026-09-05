@@ -31,7 +31,7 @@ export default function Registrations({ items, filters }: Props) {
                             })
                         }
                         className={`rounded-full px-3 py-1 text-xs font-medium ${
-                            filters.status === status ? 'bg-zinc-900 text-white' : 'bg-white text-zinc-700 border'
+                            filters.status === status ? 'bg-[color:var(--dwo-accent)] text-[color:var(--dwo-accent-contrast)]' : 'border border-[color:var(--dwo-border)] bg-[color:var(--dwo-bg-elevated)] text-[color:var(--dwo-muted)]'
                         }`}
                     >
                         {status || 'ALL'}
@@ -39,9 +39,9 @@ export default function Registrations({ items, filters }: Props) {
                 ))}
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                <table className="min-w-full text-left text-sm">
-                    <thead className="border-b bg-zinc-50 text-xs uppercase text-zinc-500">
+            <div className="overflow-x-auto dwo-glass">
+                <table className="min-w-[640px] w-full text-left text-sm">
+                    <thead className="border-b border-[color:var(--dwo-border)] bg-[color:var(--dwo-bg-soft)] text-xs uppercase text-[color:var(--dwo-muted)]">
                         <tr>
                             <th className="px-4 py-3">Name</th>
                             <th className="px-4 py-3">Status</th>
@@ -49,17 +49,17 @@ export default function Registrations({ items, filters }: Props) {
                             <th className="px-4 py-3">Ref</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y">
+                    <tbody className="divide-y divide-[color:var(--dwo-border)]">
                         {items.data.map((row) => (
                             <tr key={row.id}>
                                 <td className="px-4 py-3">
                                     <Link
                                         href={route('admin.registrations.show', row.id)}
-                                        className="font-medium hover:underline"
+                                        className="font-medium text-[color:var(--dwo-text)] hover:underline"
                                     >
                                         {row.full_name}
                                     </Link>
-                                    <div className="text-zinc-500">{row.email}</div>
+                                    <div className="text-[color:var(--dwo-muted)]">{row.email}</div>
                                 </td>
                                 <td className="px-4 py-3">{row.payment_status}</td>
                                 <td className="px-4 py-3">{row.location}</td>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PaymentReviewController;
 use App\Http\Controllers\Admin\RegistrationAdminController;
@@ -13,6 +14,7 @@ Route::get('/', HomeController::class)->name('home');
 Route::get('/register', [RegistrationController::class, 'create'])->name('register.create');
 Route::post('/register', [RegistrationController::class, 'store'])->name('register.store');
 
+Route::get('/payment/{token}/success', [PaymentController::class, 'success'])->name('payment.success');
 Route::get('/payment/{token}', [PaymentController::class, 'show'])->name('payment.show');
 Route::get('/payment/{token}/submit', [PaymentController::class, 'createSubmit'])->name('payment.submit');
 Route::post('/payment/{token}/submit', [PaymentController::class, 'storeSubmit'])->name('payment.submit.store');
@@ -22,6 +24,7 @@ Route::redirect('/admin', '/admin/dashboard');
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/analytics', AnalyticsController::class)->name('analytics');
     Route::get('/payments', [PaymentReviewController::class, 'index'])->name('payments.index');
     Route::post('/payments/{id}/verify', [PaymentReviewController::class, 'verify'])->name('payments.verify');
     Route::post('/payments/{id}/reject', [PaymentReviewController::class, 'reject'])->name('payments.reject');

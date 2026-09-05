@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Registration;
+use App\Support\Admin\RegistrationAnalytics;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(Request $request): Response
     {
+        $range = RegistrationAnalytics::normalizeRange($request->string('range')->toString() ?: null);
+
         $counts = [
             'total' => Registration::query()->count(),
             'pending' => Registration::query()->where('payment_status', 'PENDING')->count(),
@@ -27,6 +31,7 @@ class DashboardController extends Controller
         return Inertia::render('Admin/Dashboard', [
             'counts' => $counts,
             'recent' => $recent,
+            'analytics' => RegistrationAnalytics::forRange($range),
             'masterclass' => config('masterclass'),
         ]);
     }

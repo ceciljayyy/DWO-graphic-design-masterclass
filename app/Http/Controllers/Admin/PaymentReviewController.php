@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RegistrationPaymentConfirmed;
 use App\Models\AdminAuditLog;
 use App\Models\Registration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,7 +30,9 @@ class PaymentReviewController extends Controller
                 'whatsapp' => $r->whatsapp,
                 'reference' => $r->registration_reference,
                 'amount' => (float) $r->amount,
+                'fee_display' => config('masterclass.fee.display'),
                 'submission' => $r->activeManualPaymentSubmission ? [
+                    'method' => $r->activeManualPaymentSubmission->method,
                     'sender_name' => $r->activeManualPaymentSubmission->sender_name,
                     'sender_phone' => $r->activeManualPaymentSubmission->sender_phone,
                     'transaction_reference' => $r->activeManualPaymentSubmission->transaction_reference,
@@ -45,16 +49,30 @@ class PaymentReviewController extends Controller
 
     public function verify(string $id): RedirectResponse
     {
-        $registration = Registration::query()->with('activeManualPaymentSubmission')->findOrFail($id);
+        $shouldSendConfirmation = false;
+        $registrationForMail = null;
+        $error = null;
 
-        if ($registration->payment_status !== 'PAYMENT_SUBMITTED') {
-            return back()->with('error', 'Registration is not awaiting verification.');
-        }
+        DB::transaction(function () use ($id, &$shouldSendConfirmation, &$registrationForMail, &$error) {
+            $registration = Registration::query()
+                ->with('activeManualPaymentSubmission')
+                ->whereKey($id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        DB::transaction(function () use ($registration) {
+            if ($registration->payment_status === 'PAID') {
+                return;
+            }
+
+            if ($registration->payment_status !== 'PAYMENT_SUBMITTED') {
+                $error = 'Registration is not awaiting verification.';
+
+                return;
+            }
+
             $registration->update([
                 'payment_status' => 'PAID',
-                'paid_at' => now(),
+                'paid_at' => $registration->paid_at ?? now(),
             ]);
 
             $registration->activeManualPaymentSubmission?->update([
@@ -65,24 +83,51 @@ class PaymentReviewController extends Controller
             AdminAuditLog::record((string) Auth::id(), 'MANUAL_PAYMENT_VERIFIED', [
                 'registration_id' => $registration->id,
             ]);
+
+            if ($registration->confirmation_email_sent_at === null) {
+                $shouldSendConfirmation = true;
+                $registrationForMail = $registration->fresh();
+            }
         });
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
+
+        if ($shouldSendConfirmation && $registrationForMail) {
+            Mail::to($registrationForMail->email)->send(
+                new RegistrationPaymentConfirmed($registrationForMail)
+            );
+
+            Registration::query()->whereKey($registrationForMail->id)->whereNull('confirmation_email_sent_at')->update([
+                'confirmation_email_sent_at' => now(),
+            ]);
+        }
 
         return back()->with('success', 'Payment verified.');
     }
 
     public function reject(Request $request, string $id): RedirectResponse
     {
-        $registration = Registration::query()->with('activeManualPaymentSubmission')->findOrFail($id);
-
-        if ($registration->payment_status !== 'PAYMENT_SUBMITTED') {
-            return back()->with('error', 'Registration is not awaiting verification.');
-        }
-
         $data = $request->validate([
             'admin_note' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        DB::transaction(function () use ($registration, $data) {
+        $error = null;
+
+        DB::transaction(function () use ($id, $data, &$error) {
+            $registration = Registration::query()
+                ->with('activeManualPaymentSubmission')
+                ->whereKey($id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($registration->payment_status !== 'PAYMENT_SUBMITTED') {
+                $error = 'Registration is not awaiting verification.';
+
+                return;
+            }
+
             $registration->update([
                 'payment_status' => 'PAYMENT_REJECTED',
             ]);
@@ -98,6 +143,10 @@ class PaymentReviewController extends Controller
                 'registration_id' => $registration->id,
             ]);
         });
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
 
         return back()->with('success', 'Payment rejected.');
     }
