@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useState } from 'react';
 type Props = {
     masterclass: { brand: string; fee: { display: string }; name: string };
     experienceLevels: string[];
+    locationOptions: Record<string, string[]>;
     schedules: { value: string; label: string }[];
 };
 
@@ -16,6 +17,7 @@ type RegisterForm = {
     email: string;
     phone: string;
     whatsapp: string;
+    country: string;
     location: string;
     experience_level: string;
     schedule: string;
@@ -29,6 +31,7 @@ const emptyForm = (): RegisterForm => ({
     email: '',
     phone: '',
     whatsapp: '',
+    country: 'Ghana',
     location: '',
     experience_level: 'BEGINNER',
     schedule: 'WEEKDAYS',
@@ -63,10 +66,13 @@ function formHasContent(form: RegisterForm): boolean {
     return (Object.keys(form) as (keyof RegisterForm)[]).some((key) => form[key] !== blank[key]);
 }
 
-export default function Register({ masterclass, experienceLevels, schedules }: Props) {
+export default function Register({ masterclass, experienceLevels, locationOptions, schedules }: Props) {
     const { data, setData, post, processing, errors, reset } = useForm<RegisterForm>(emptyForm());
     const [hydrated, setHydrated] = useState(false);
     const [draftRestored, setDraftRestored] = useState(false);
+    const countries = Object.keys(locationOptions);
+    const selectedCountry = countries.includes(data.country) ? data.country : countries[0];
+    const cities = locationOptions[selectedCountry] ?? [];
 
     useEffect(() => {
         const draft = readDraft();
@@ -96,6 +102,16 @@ export default function Register({ masterclass, experienceLevels, schedules }: P
         localStorage.removeItem(DRAFT_KEY);
         reset();
         setDraftRestored(false);
+    };
+
+    const updateCountry = (country: string) => {
+        const nextCities = locationOptions[country] ?? [];
+
+        setData('country', country);
+
+        if (! nextCities.includes(data.location)) {
+            setData('location', '');
+        }
     };
 
     const submit = (e: FormEvent) => {
@@ -186,17 +202,51 @@ export default function Register({ masterclass, experienceLevels, schedules }: P
                         <InputError message={errors.phone} className="mt-1" />
                     </div>
 
-                    <div>
-                        <InputLabel htmlFor="location" value="City / location" />
-                        <TextInput
-                            id="location"
-                            className="mt-1 block w-full"
-                            value={data.location}
-                            onChange={(e) => setData('location', e.target.value)}
-                            required
-                        />
-                        <InputError message={errors.location} className="mt-1" />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <InputLabel htmlFor="country" value="Country" />
+                            <select
+                                id="country"
+                                className="dwo-input mt-1 block w-full"
+                                value={selectedCountry}
+                                onChange={(e) => updateCountry(e.target.value)}
+                                required
+                            >
+                                {countries.map((country) => (
+                                    <option key={country} value={country}>
+                                        {country}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError message={errors.country} className="mt-1" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="location" value="City / location" />
+                            <select
+                                id="location"
+                                className="dwo-input mt-1 block w-full"
+                                value={data.location}
+                                onChange={(e) => setData('location', e.target.value)}
+                                required
+                            >
+                                <option value="">Select city / location</option>
+                                {cities.map((city) => (
+                                    <option key={city} value={city}>
+                                        {city}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError message={errors.location} className="mt-1" />
+                        </div>
                     </div>
+
+                    {data.location === 'Other' && (
+                        <div className="dwo-glass px-4 py-3 text-sm text-[color:var(--dwo-muted)]">
+                            Select Other if your city is not listed, then include your exact location when the DWO team
+                            contacts you on WhatsApp.
+                        </div>
+                    )}
 
                     <div>
                         <InputLabel htmlFor="experience_level" value="Experience level" />
