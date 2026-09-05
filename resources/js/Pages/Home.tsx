@@ -1,5 +1,5 @@
-import ImageLoop from '@/Components/ImageLoop';
 import SelectedWorkGallery from '@/Components/SelectedWorkGallery';
+import StudentResults from '@/Components/StudentResults';
 import ThemeToggle from '@/Components/ThemeToggle';
 import { Head, Link } from '@inertiajs/react';
 
@@ -181,78 +181,7 @@ export default function Home({ masterclass, portfolio, studentWork }: Props) {
 
                 <SelectedWorkGallery items={portfolio} />
 
-                <section className="border-t border-[color:var(--dwo-border)] py-20">
-                    <div className="dwo-container">
-                        <div className="text-center">
-                            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--dwo-accent)]">
-                                Student success
-                            </p>
-                            <h2 className="dwo-display mt-4 text-4xl text-[color:var(--dwo-text)] sm:text-6xl">
-                                Real students.{' '}
-                                <span className="text-[color:var(--dwo-danger)]">Real transforms.</span>
-                            </h2>
-                            <p className="mx-auto mt-4 max-w-2xl text-[color:var(--dwo-muted)]">
-                                See how student work improves through the {masterclass.name} — from early attempts to
-                                polished, professional design.
-                            </p>
-                        </div>
-
-                        <div className="mt-14">
-                            <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--dwo-accent)]">
-                                Student work transformation
-                            </p>
-
-                            <div className="dwo-glass-panel relative mt-6 p-4 sm:p-6">
-                                <div className="grid items-center gap-4 md:grid-cols-[1fr_auto_1fr] md:gap-6">
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-3 z-10 bg-[color:var(--dwo-danger)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-                                            Before
-                                        </span>
-                                        <ImageLoop
-                                            images={studentWork.before}
-                                            altPrefix="Student work before"
-                                            intervalMs={2000}
-                                        />
-                                    </div>
-
-                                    <div className="mx-auto flex h-12 w-12 items-center justify-center border border-[color:var(--dwo-accent)]/40 bg-[color:var(--dwo-accent)] text-lg font-bold text-[color:var(--dwo-accent-contrast)]">
-                                        →
-                                    </div>
-
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-3 z-10 bg-[color:var(--dwo-accent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[color:var(--dwo-accent-contrast)]">
-                                            After
-                                        </span>
-                                        <ImageLoop
-                                            images={studentWork.after}
-                                            altPrefix="Student work after"
-                                            intervalMs={2000}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="dwo-glass mt-10 px-5 py-6 sm:px-8">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="flex gap-4">
-                                    <span className="text-4xl leading-none text-[color:var(--dwo-accent)]" aria-hidden="true">
-                                        “
-                                    </span>
-                                    <p className="max-w-3xl text-base text-[color:var(--dwo-text)] sm:text-lg">
-                                        The class completely changed how I approach design and content creation.
-                                    </p>
-                                </div>
-                                <div className="shrink-0 border-t border-[color:var(--dwo-border)] pt-4 text-left sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--dwo-text)]">
-                                        Previous student
-                                    </p>
-                                    <p className="mt-1 text-sm text-[color:var(--dwo-muted)]">Design With Otabil</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <StudentResults studentWork={studentWork} />
 
                 <section id="instructor" className="relative overflow-hidden border-t border-[color:var(--dwo-border)] py-16 md:py-24">
                     <div
