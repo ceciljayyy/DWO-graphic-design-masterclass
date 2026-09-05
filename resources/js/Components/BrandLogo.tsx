@@ -8,8 +8,8 @@ type Props = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'> & {
 };
 
 const SRC: Record<Variant, string> = {
-    full: '/brand/dwo-logo-transparent.png',
-    mark: '/brand/dwo-mark-transparent.png',
+    full: '/brand/dwo-logo-white.png',
+    mark: '/brand/dwo-logo-white.png',
 };
 
 /**

@@ -58,6 +58,7 @@
         background-attachment: fixed;
         color: var(--dwo-text);
         min-height: 100vh;
+        overflow-x: hidden;
     }
 
     ::selection {
@@ -68,7 +69,10 @@
 
 @layer components {
     .dwo-container {
-        @apply mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-8 xl:px-10 2xl:px-12;
+        @apply mx-auto w-full;
+        max-width: min(94vw, 112rem);
+        padding-left: clamp(1rem, 2.4vw, 3.5rem);
+        padding-right: clamp(1rem, 2.4vw, 3.5rem);
     }
 
     .dwo-page {
