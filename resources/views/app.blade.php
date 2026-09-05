@@ -6,7 +6,7 @@
         <meta name="color-scheme" content="dark light">
         <meta name="theme-color" content="#0b0b0c">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'DWO Masterclass') }}</title>
         <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('brand/dwo-logo-white.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('brand/dwo-logo-white.png') }}">
 <link rel="apple-touch-icon" href="{{ asset('brand/dwo-logo-white.png') }}">

@@ -1,4 +1,4 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
+import BrandLogo from '@/Components/BrandLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
@@ -18,12 +18,12 @@ export default function Authenticated({
     return (
         <div className="dwo-page">
             <nav className="dwo-header-bar">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="dwo-container">
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
                                 <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-[color:var(--dwo-accent)]" />
+                                    <BrandLogo className="block h-9 max-w-[4.5rem]" />
                                 </Link>
                             </div>
 
@@ -131,7 +131,7 @@ export default function Authenticated({
 
             {header && (
                 <header className="dwo-header-bar">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{header}</div>
+                    <div className="dwo-container py-6">{header}</div>
                 </header>
             )}
 

@@ -1,4 +1,4 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
+import BrandLogo from '@/Components/BrandLogo';
 import ThemeToggle from '@/Components/ThemeToggle';
 import { Link } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
@@ -14,7 +14,7 @@ export default function Guest({ children }: PropsWithChildren) {
             </div>
             <div>
                 <Link href="/">
-                    <ApplicationLogo className="h-16 w-16 fill-current text-[color:var(--dwo-accent)] sm:h-20 sm:w-20" />
+                    <BrandLogo className="h-16 max-w-[5rem] sm:h-20 sm:max-w-[6rem]" />
                 </Link>
             </div>
 

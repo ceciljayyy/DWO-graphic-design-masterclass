@@ -57,7 +57,7 @@ export default function SelectedWorkGallery({ items }: Props) {
         <section className="relative overflow-hidden border-t border-[color:var(--dwo-border)] py-20 sm:py-24">
             <div className="dwo-hero-glow opacity-60" aria-hidden />
 
-            <div className="relative mx-auto max-w-7xl px-6">
+            <div className="dwo-container relative">
                 <div className="text-center">
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[color:var(--dwo-accent)]">
                         The work
